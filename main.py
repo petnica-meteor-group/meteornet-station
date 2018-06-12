@@ -5,11 +5,16 @@ from shutil import disk_usage
 from time import sleep
 from random import randint
 import ctypes
+import requests
 
 UCONTROLLER_LIB_PATHS = [ "ucontroller/ucontroller.so", "ucontroller/ucontroller.dll" ]
 
-TELEMETRY_PERIOD_MIN = 2
-TELEMETRY_PERIOD_MAX = 5
+# In minutes
+TELEMETRY_PERIOD_MIN = 60
+TELEMETRY_PERIOD_MAX = 120
+
+TELEMETRY_URL_REGISTER = "http://localhost/station_register"
+TELEMETRY_URL_UPDATE = "http://localhost/staton_update"
 
 def get_ucontroller():
     ucontroller = None
@@ -29,24 +34,37 @@ def telemetry():
     ucontroller = get_ucontroller()
     print(ucontroller.init().decode('utf-8'), end='')
 
-    for i in range(0, 5):
-        print(ucontroller.send_cmd(i).decode('utf-8'), end='')
-        sleep(3)
+    name = "Station1"
 
-    '''
+    data = { 'data' : '{ "name" : "' + name +'" }' }
+
+    request = requests.post(TELEMETRY_URL_REGISTER, data=data)
+    id = request.text
+
     try:
         while True:
             total_bytes, used_bytes, free_bytes = disk_usage(path.realpath('/'))
 
-            disk_used = used_bytes / (10 ** 9)
-            disk_cap = total_bytes / (10 ** 9)
+            disk_used = str(used_bytes / (10 ** 9))
+            disk_cap = str(total_bytes / (10 ** 9))
 
-            print(str(disk_used) + "/" + str(disk_cap))
+            output = ucontroller.send_cmd(i).decode('utf-8')split('\n')[1].split(' ')
+            humidity = output[0]
+            temperature = output[1]
 
-            sleep(randint(TELEMETRY_PERIOD_MIN, TELEMETRY_PERIOD_MAX))
+            data = {
+                     'id'   : id,
+                     'data' : '{ "humidity"    : "' + humidity    + '",' \
+                              '  "temperature" : "' + temperature + '",' \
+                              '  "disk_used"   : "' + disk_used   + '",' \
+                              '  "disk_cap"    : "' + disk_cap    + '"'
+                    }
+
+            request = requests.post(TELEMETRY_URL_UPDATE, data=data)
+
+            sleep(randint(TELEMETRY_PERIOD_MIN * 60, TELEMETRY_PERIOD_MAX * 60))
     except KeyboardInterrupt:
         pass
-    '''
 
     print(ucontroller.end().decode('utf-8'), end='')
     print("Ending telemetry.")
