@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define FLOAT_BUFFER_SIZE 64
 #define RESULT_BUFFER_SIZE 128
 
 const char *COMMAND_SENT_MSG = "Command sent.\n";
