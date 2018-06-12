@@ -1,0 +1,3 @@
+[submodule "ucontroller/serial-com"]
+	path = ucontroller/serial-com
+	url = https://github.com/schutzekatze/serial-com
