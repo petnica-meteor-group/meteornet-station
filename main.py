@@ -5,96 +5,90 @@ from os import path
 from shutil import disk_usage
 from time import sleep
 from random import randint
-import sys
-import ctypes
+import time
+import configparser
 import requests
-
-UCONTROLLER_LIB_PATHS = [ "./ucontroller.so", "./ucontroller.dll" ]
+import ucontroller
 
 # In minutes
 TELEMETRY_PERIOD_MIN = 60
 TELEMETRY_PERIOD_MAX = 120
 
+STATION_INFO_FILEPATH= './station-info.cfg'
+
 TELEMETRY_URL_REGISTER = "http://localhost/station_register"
 TELEMETRY_URL_UPDATE = "http://localhost/staton_update"
 
-def get_ucontroller():
-    ucontroller = None
-    lib_path = path.dirname(path.realpath(__file__)) + "/ucontroller"
-
-    # Check if 32 or 64 bit
-    if sys.maxsize <= 2**32:
-        lib_path += "32"
-    else:
-        lib_path += "64"
-
-    # Check OS
-    if os.name == 'posix':
-        lib_path += '.so'
-    elif os.name == 'nt':
-        lib_path += '.dll'
-
-    if path.exists(lib_path):
-        ucontroller = ctypes.cdll.LoadLibrary(lib_path)
-
-    if ucontroller == None:
-        print("Unsupported platform.")
-        return None
-
-    ucontroller.init.restype = ctypes.c_char_p
-    ucontroller.end.restype = ctypes.c_char_p
-    ucontroller.send_cmd.argtypes = (ctypes.c_int,)
-    ucontroller.send_cmd.restype = ctypes.c_char_p
-
-    return ucontroller
+def night():
+    hours = float(time.strftime("%H"))
+    return (19 <= hours <= 24) or (0 <= hours <= 7)
 
 def telemetry():
-    ucontroller = get_ucontroller()
-    if ucontroller == None:
-        print("Error acquiring microcontroller.")
+    if not ucontroller.init():
         return
 
-    print(ucontroller.init().decode('utf-8'), end='')
+    if night():
+        shutter_open, camera_on = ucontroller.camera_switch(True)
+    else:
+        shutter_open, camera_on = ucontroller.camera_switch(False)
 
-    for i in range(0, 5):
-        print(ucontroller.send_cmd(i).decode('utf-8'), end='')
-        sleep(3)
+    id = None
+    try:
+        while True:
+            if night() and not camera_on:
+                shutter_open, camera_on = ucontroller.camera_switch(True)
+            elif not night() and camera_on:
+                shutter_open, camera_on = ucontroller.camera_switch(False)
 
-    #
-    # name = "Station1"
-    #
-    # data = { 'data' : '{ "name" : "' + name +'" }' }
-    #
-    # request = requests.post(TELEMETRY_URL_REGISTER, data=data)
-    # id = request.text
-    #
-    # try:
-    #     while True:
-    #         total_bytes, used_bytes, free_bytes = disk_usage(path.realpath('/'))
-    #
-    #         disk_used = str(used_bytes / (10 ** 9))
-    #         disk_cap = str(total_bytes / (10 ** 9))
-    #
-    #         output = ucontroller.send_cmd(i).decode('utf-8')split('\n')[1].split(' ')
-    #         humidity = output[0]
-    #         temperature = output[1]
-    #
-    #         data = {
-    #                  'id'   : id,
-    #                  'data' : '{ "humidity"    : "' + humidity    + '",' \
-    #                           '  "temperature" : "' + temperature + '",' \
-    #                           '  "disk_used"   : "' + disk_used   + '",' \
-    #                           '  "disk_cap"    : "' + disk_cap    + '"'
-    #                 }
-    #
-    #         request = requests.post(TELEMETRY_URL_UPDATE, data=data)
-    #
-    #         sleep(randint(TELEMETRY_PERIOD_MIN * 60, TELEMETRY_PERIOD_MAX * 60))
-    # except KeyboardInterrupt:
-    #     pass
+            total_bytes, used_bytes, free_bytes = disk_usage(path.realpath('/'))
 
+            disk_used = str(used_bytes / (10 ** 9))
+            disk_cap = str(total_bytes / (10 ** 9))
 
-    print(ucontroller.end().decode('utf-8'), end='')
+            humidity, temperature = ucontroller.get_dht_info()
+
+            config = configparser.ConfigParser()
+            config.read(STATION_INFO_FILEPATH)
+
+            name = config['station']['name']
+            host_name = config['host']['name']
+            host_phone = config['host']['phone']
+            host_email = config['host']['email']
+            host_comment = config['host']['comment']
+
+            station = '''
+                      "name"        : "{}",
+                      "humidity"    : "{}",
+                      "temperature" : "{}",
+                      "disk_used"   : "{}",
+                      "disk_cap"    : "{}"
+                      '''.format(name, humidity, temperature, disk_used, disk_cap)
+            host =  '''
+                    "name"    : "{}",
+                    "phone"   : "{}",
+                    "email"   : "{}",
+                    "comment" : "{}"
+                    '''.format(host_name, host_phone, host_email, host_comment)
+
+            data = '{ ' + station + ', "host": {' + host + '} }'
+
+            if id == None:
+                print("Registering")
+
+                data = { 'data' : data }
+                request = requests.post(TELEMETRY_URL_REGISTER, data=data)
+                id = request.text
+            else:
+                print("Updating")
+
+                data = { 'id' : id, 'data' : data }
+                request = requests.post(TELEMETRY_URL_UPDATE, data=data)
+
+            sleep(randint(int(TELEMETRY_PERIOD_MIN * 60), int(TELEMETRY_PERIOD_MAX * 60)))
+    except KeyboardInterrupt:
+        pass
+
+    ucontroller.end()
     print("Ending telemetry.")
 
 if __name__ == "__main__":
