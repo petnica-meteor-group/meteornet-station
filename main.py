@@ -7,7 +7,7 @@ from random import randint
 import ctypes
 import requests
 
-UCONTROLLER_LIB_PATHS = [ "ucontroller/ucontroller.so", "ucontroller/ucontroller.dll" ]
+UCONTROLLER_LIB_PATHS = [ "./ucontroller.so", "./ucontroller.dll" ]
 
 # In minutes
 TELEMETRY_PERIOD_MIN = 60
