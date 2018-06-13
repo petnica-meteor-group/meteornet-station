@@ -35,7 +35,7 @@ def telemetry():
     print(ucontroller.init().decode('utf-8'), end='')
 
     for i in range(0, 5):
-        print(ucontroller.send_cmd().decode('utf-8'), end='')
+        print(ucontroller.send_cmd(i).decode('utf-8'), end='')
         sleep(3)
 
     #
