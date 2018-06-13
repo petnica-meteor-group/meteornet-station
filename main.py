@@ -34,37 +34,43 @@ def telemetry():
     ucontroller = get_ucontroller()
     print(ucontroller.init().decode('utf-8'), end='')
 
-    name = "Station1"
+    for i in range(0, 5):
+        print(ucontroller.send_cmd().decode('utf-8'), end='')
+        sleep(3)
 
-    data = { 'data' : '{ "name" : "' + name +'" }' }
+    #
+    # name = "Station1"
+    #
+    # data = { 'data' : '{ "name" : "' + name +'" }' }
+    #
+    # request = requests.post(TELEMETRY_URL_REGISTER, data=data)
+    # id = request.text
+    #
+    # try:
+    #     while True:
+    #         total_bytes, used_bytes, free_bytes = disk_usage(path.realpath('/'))
+    #
+    #         disk_used = str(used_bytes / (10 ** 9))
+    #         disk_cap = str(total_bytes / (10 ** 9))
+    #
+    #         output = ucontroller.send_cmd(i).decode('utf-8')split('\n')[1].split(' ')
+    #         humidity = output[0]
+    #         temperature = output[1]
+    #
+    #         data = {
+    #                  'id'   : id,
+    #                  'data' : '{ "humidity"    : "' + humidity    + '",' \
+    #                           '  "temperature" : "' + temperature + '",' \
+    #                           '  "disk_used"   : "' + disk_used   + '",' \
+    #                           '  "disk_cap"    : "' + disk_cap    + '"'
+    #                 }
+    #
+    #         request = requests.post(TELEMETRY_URL_UPDATE, data=data)
+    #
+    #         sleep(randint(TELEMETRY_PERIOD_MIN * 60, TELEMETRY_PERIOD_MAX * 60))
+    # except KeyboardInterrupt:
+    #     pass
 
-    request = requests.post(TELEMETRY_URL_REGISTER, data=data)
-    id = request.text
-
-    try:
-        while True:
-            total_bytes, used_bytes, free_bytes = disk_usage(path.realpath('/'))
-
-            disk_used = str(used_bytes / (10 ** 9))
-            disk_cap = str(total_bytes / (10 ** 9))
-
-            output = ucontroller.send_cmd(i).decode('utf-8')split('\n')[1].split(' ')
-            humidity = output[0]
-            temperature = output[1]
-
-            data = {
-                     'id'   : id,
-                     'data' : '{ "humidity"    : "' + humidity    + '",' \
-                              '  "temperature" : "' + temperature + '",' \
-                              '  "disk_used"   : "' + disk_used   + '",' \
-                              '  "disk_cap"    : "' + disk_cap    + '"'
-                    }
-
-            request = requests.post(TELEMETRY_URL_UPDATE, data=data)
-
-            sleep(randint(TELEMETRY_PERIOD_MIN * 60, TELEMETRY_PERIOD_MAX * 60))
-    except KeyboardInterrupt:
-        pass
 
     print(ucontroller.end().decode('utf-8'), end='')
     print("Ending telemetry.")
