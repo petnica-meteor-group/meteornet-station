@@ -5,6 +5,7 @@ from os import path
 from shutil import disk_usage
 from time import sleep
 from random import randint
+import sys
 import ctypes
 import requests
 
@@ -19,7 +20,7 @@ TELEMETRY_URL_UPDATE = "http://localhost/staton_update"
 
 def get_ucontroller():
     ucontroller = None
-    lib_path = "./ucontroller"
+    lib_path = path.dirname(path.realpath(__file__)) + "/ucontroller"
 
     # Check if 32 or 64 bit
     if sys.maxsize <= 2**32:
@@ -30,7 +31,7 @@ def get_ucontroller():
     # Check OS
     if os.name == 'posix':
         lib_path += '.so'
-    elif os.name = 'nt':
+    elif os.name == 'nt':
         lib_path += '.dll'
 
     if path.exists(lib_path):
