@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 from os import path
 from shutil import disk_usage
 from time import sleep
@@ -18,10 +19,18 @@ TELEMETRY_URL_UPDATE = "http://localhost/staton_update"
 
 def get_ucontroller():
     ucontroller = None
-    for i in range(0, len(UCONTROLLER_LIB_PATHS)):
-        if path.exists(UCONTROLLER_LIB_PATHS[i]):
-            ucontroller = ctypes.cdll.LoadLibrary(UCONTROLLER_LIB_PATHS[i])
-            break
+    lib_path = ""
+    if os.name == 'posix':
+        lib_path = './ucontroller.so'
+    elif os.name = 'nt':
+        lib_path = './ucontroller.dll'
+
+    if path.exists(lib_path):
+        ucontroller = ctypes.cdll.LoadLibrary(lib_path)
+
+    if ucontroller == None:
+        print("Unsupported OS.")
+        return None
 
     ucontroller.init.restype = ctypes.c_char_p
     ucontroller.end.restype = ctypes.c_char_p
@@ -32,6 +41,10 @@ def get_ucontroller():
 
 def telemetry():
     ucontroller = get_ucontroller()
+    if ucontroller == None:
+        print("Error acquiring microcontroller.")
+        return
+
     print(ucontroller.init().decode('utf-8'), end='')
 
     for i in range(0, 5):

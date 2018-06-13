@@ -7,37 +7,49 @@ rm -rf build
 mkdir -p build/$(basename $SCRIPT_DIR)
 cd build/$(basename $SCRIPT_DIR)
 
-while [[ "$#" > 0 ]]; do case $1 in
-  -l|--linux) linux=1; shift;;
-  -w|--windows) windows=1;;
-  *) echo "Unknown parameter passed: $1"; exit 1;;
-esac; shift; done
+function compile() {
+    if [[ -x "$(command -v $CC)" && -x "$(command -v $CXX)" ]]; then
+        echo "Compiling with: $CC and $CXX"
+    else
+        echo "Unsupported compilers: $CC and $CXX"
+        return
+    fi
 
-if [[ ! $windows && ! $linux ]]; then
-    echo "Please specify platform: --linux or --windows"
-    exit 1
-fi
+    for c_file in $(find $SCRIPT_DIR/ucontroller -iname "*.c"); do
+        $CC $OPTIONS -c $c_file -o $(basename $c_file).o
+    done
 
+    for cpp_file in $(find $SCRIPT_DIR/ucontroller -iname "*.cpp"); do
+        $CXX $OPTIONS -c $cpp_file -o $(basename $cpp_file).o
+    done
+
+    $CC $OPTIONS *.o -o $OUTPUT
+
+    success=$?
+
+    rm -f *.o
+
+    if [[ $success -eq 0 ]]; then
+        echo "Done"
+    else
+        echo "Errors occured"
+    fi
+}
+
+# Linux
 CC=gcc
 CXX=g++
-OUTPUT=ucontroller.so
 OPTIONS="-shared -fPIC"
+OUTPUT=ucontroller.so
 
-if [[ $windows ]]; then
-    CC=mingw32-gcc
-    CXX=mingw32-g++
-    OUTPUT=ucontroller.dll
-fi
+compile
 
-for c_file in $(find $SCRIPT_DIR/ucontroller -iname "*.c"); do
-    $CC $OPTIONS -c $c_file -o $(basename $c_file).o
-done
+# Windows
+CC=x86_64-w64-mingw32-gcc
+CXX=x86_64-w64-mingw32-g++
+OPTIONS="$OPTIONS -L$SCRIPT_DIR/ucontroller/serial-com/implementations -lws2_32"
+OUTPUT=ucontroller.dll
 
-for cpp_file in $(find $SCRIPT_DIR/ucontroller -iname "*.cpp"); do
-    $CXX $OPTIONS -c $cpp_file -o $(basename $cpp_file).o
-done
+compile
 
-$CC $OPTIONS *.o -o $OUTPUT
-
-rm -f *.o
 cp $SCRIPT_DIR/main.py .
