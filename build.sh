@@ -36,19 +36,27 @@ function compile() {
     fi
 }
 
-# Linux
+# Linux 64-bit
 CC=gcc
 CXX=g++
 OPTIONS="-shared -fPIC"
-OUTPUT=ucontroller.so
+OUTPUT=ucontroller64.so
 
 compile
 
-# Windows
+# Windows 32-bit
+CC=i686-w64-mingw32-gcc
+CXX=i686-w64-mingw32-g++
+OPTIONS="$OPTIONS"
+OUTPUT=ucontroller32.dll
+
+compile
+
+# Windows 64-bit
 CC=x86_64-w64-mingw32-gcc
 CXX=x86_64-w64-mingw32-g++
-OPTIONS="$OPTIONS -L$SCRIPT_DIR/ucontroller/serial-com/implementations -lws2_32"
-OUTPUT=ucontroller.dll
+OPTIONS="$OPTIONS"
+OUTPUT=ucontroller64.dll
 
 compile
 

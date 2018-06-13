@@ -19,17 +19,25 @@ TELEMETRY_URL_UPDATE = "http://localhost/staton_update"
 
 def get_ucontroller():
     ucontroller = None
-    lib_path = ""
+    lib_path = "./ucontroller"
+
+    # Check if 32 or 64 bit
+    if sys.maxsize <= 2**32:
+        lib_path += "32"
+    else:
+        lib_path += "64"
+
+    # Check OS
     if os.name == 'posix':
-        lib_path = './ucontroller.so'
+        lib_path += '.so'
     elif os.name = 'nt':
-        lib_path = './ucontroller.dll'
+        lib_path += '.dll'
 
     if path.exists(lib_path):
         ucontroller = ctypes.cdll.LoadLibrary(lib_path)
 
     if ucontroller == None:
-        print("Unsupported OS.")
+        print("Unsupported platform.")
         return None
 
     ucontroller.init.restype = ctypes.c_char_p
