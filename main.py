@@ -21,7 +21,7 @@ STATION_INFO_FILEPATH= path.dirname(path.realpath(__file__)) + '/station-info.cf
 SERVER_URL = "http://localhost:8000"
 TELEMETRY_URL_REGISTER = SERVER_URL + "/station_register"
 TELEMETRY_URL_UPDATE   = SERVER_URL + "/station_update"
-ERROR_URL              = SERVER_URL + "/report_error"
+ERROR_URL              = SERVER_URL + "/station_error"
 
 def night():
     hours = float(time.strftime("%H"))
@@ -134,7 +134,7 @@ def telemetry():
                 except requests.ConnectionError:
                     print("Could not connect to the server.")
 
-                errors = filter(lambda e: e not in errors_sent, errors)
+                errors = [e for e in errors if e not in errors_sent]
 
             sleep(randint(int(TELEMETRY_PERIOD_MIN * 60), int(TELEMETRY_PERIOD_MAX * 60)))
     except KeyboardInterrupt:
