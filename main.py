@@ -5,19 +5,20 @@ from os import path
 from shutil import disk_usage
 from time import sleep
 from random import randint
+import math
 import time
 import configparser
 import requests
 import ucontroller
 
 # In minutes
-TELEMETRY_PERIOD_MIN = 60
-TELEMETRY_PERIOD_MAX = 120
+TELEMETRY_PERIOD_MIN = 0.1 #60
+TELEMETRY_PERIOD_MAX = 0.1 #120
 
-STATION_INFO_FILEPATH= './station-info.cfg'
+STATION_INFO_FILEPATH= path.dirname(path.realpath(__file__)) + '/station-info.cfg'
 
-TELEMETRY_URL_REGISTER = "http://localhost/station_register"
-TELEMETRY_URL_UPDATE = "http://localhost/staton_update"
+TELEMETRY_URL_REGISTER = "http://localhost:8000/station_register"
+TELEMETRY_URL_UPDATE = "http://localhost:8000/station_update"
 
 def night():
     hours = float(time.strftime("%H"))
@@ -58,31 +59,37 @@ def telemetry():
 
             station = '''
                       "name"        : "{}",
-                      "humidity"    : "{}",
-                      "temperature" : "{}",
                       "disk_used"   : "{}",
                       "disk_cap"    : "{}"
-                      '''.format(name, humidity, temperature, disk_used, disk_cap)
-            host =  '''
-                    "name"    : "{}",
-                    "phone"   : "{}",
-                    "email"   : "{}",
-                    "comment" : "{}"
-                    '''.format(host_name, host_phone, host_email, host_comment)
+                      '''.format(name, disk_used, disk_cap)
+
+            if not math.isnan(float(humidity)):
+                station += ', "humidity" : "' + humidity + '"'
+
+            if not math.isnan(float(temperature)):
+                station += ', "temperature" : "' + temperature + '"'
+
+            host = '"name" : "' + host_name + '"'
+            if len(host_phone) > 0: host += ', "phone" : "' + host_phone + '"'
+            if len(host_email) > 0: host += ', "email" : "' + host_email + '"'
+            if len(host_comment) > 0: host += ', "comment" : "' + host_comment + '"'
 
             data = '{ ' + station + ', "host": {' + host + '} }'
 
-            if id == None:
-                print("Registering")
+            try:
+                if id == None:
+                    print("Registering")
 
-                data = { 'data' : data }
-                request = requests.post(TELEMETRY_URL_REGISTER, data=data)
-                id = request.text
-            else:
-                print("Updating")
+                    data = { 'data' : data }
+                    request = requests.post(TELEMETRY_URL_REGISTER, data=data)
+                    id = request.text
+                else:
+                    print("Updating")
 
-                data = { 'id' : id, 'data' : data }
-                request = requests.post(TELEMETRY_URL_UPDATE, data=data)
+                    data = { 'id' : id, 'data' : data }
+                    request = requests.post(TELEMETRY_URL_UPDATE, data=data)
+            except requests.ConnectionError:
+                print("Could not connect to server")
 
             sleep(randint(int(TELEMETRY_PERIOD_MIN * 60), int(TELEMETRY_PERIOD_MAX * 60)))
     except KeyboardInterrupt:

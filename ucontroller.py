@@ -37,8 +37,12 @@ def init():
         print("Error initializing microcontroller.")
         return False
 
-    print(ucontroller.init().decode('utf-8'), end='')
-    return True
+    output = ucontroller.init().decode('utf-8')
+    print(output, end='')
+    if "ERROR" in output:
+        return False
+    else:
+        return True
 
 def end():
     global ucontroller
