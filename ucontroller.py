@@ -5,8 +5,17 @@ import os
 
 ucontroller = None
 
+class UControllerError(Exception):
+    pass
+
+def check_errors(output):
+    output = output.decode('utf-8')
+    if "ERROR" in output: raise UControllerError(output)
+    return output
+
 def init():
     global ucontroller
+
     lib_path = path.dirname(path.realpath(__file__)) + "/ucontroller"
 
     # Check if 32 or 64 bit
@@ -46,11 +55,15 @@ def init():
 
 def end():
     global ucontroller
+
     print(ucontroller.end().decode('utf-8'), end='')
 
 def get_dht_info():
     global ucontroller
-    output = ucontroller.send_cmd(4).decode('utf-8').split('\n')[1].split(' ')
+
+    output = check_errors(ucontroller.send_cmd(4))
+
+    output = output.split('\n')[1].split(' ')
     humidity = output[0]
     temperature = output[1]
 
@@ -60,12 +73,13 @@ def get_dht_info():
 
 def camera_switch(turn_on):
     global ucontroller
+
     if turn_on:
-        ucontroller.send_cmd(0)
-        ucontroller.send_cmd(2)
+        check_errors(ucontroller.send_cmd(0))
+        check_errors(ucontroller.send_cmd(2))
     else:
-        ucontroller.send_cmd(1)
-        ucontroller.send_cmd(3)
+        check_errors(ucontroller.send_cmd(1))
+        check_errors(ucontroller.send_cmd(3))
 
     print("Camera switched on")
 

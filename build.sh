@@ -60,6 +60,5 @@ OUTPUT=ucontroller64.dll
 
 compile
 
-cp $SCRIPT_DIR/main.py .
-cp $SCRIPT_DIR/ucontroller.py .
+cp $SCRIPT_DIR/*.py .
 cp $SCRIPT_DIR/station-info.cfg .
