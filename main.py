@@ -13,8 +13,8 @@ import ucontroller
 import traceback
 
 # In minutes
-TELEMETRY_PERIOD_MIN = 0.1 #60
-TELEMETRY_PERIOD_MAX = 0.1 #120
+TELEMETRY_PERIOD_MIN = 60
+TELEMETRY_PERIOD_MAX = 120
 
 STATION_INFO_FILEPATH= path.dirname(path.realpath(__file__)) + '/station-info.cfg'
 
