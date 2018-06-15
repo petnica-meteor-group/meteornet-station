@@ -52,14 +52,14 @@ def get_station_data(config):
     humidity, temperature = ucontroller.get_dht_info()
 
     try:
-        float(humidity)
-        station_data += ', "humidity" : "' + humidity + '"'
+        if not math.isnan(float(humidity)):
+            station_data += ', "humidity" : "' + humidity + '"'
     except ValueError:
         pass
 
     try:
-        float(temperature)
-        station_data += ', "temperature" : "' + temperature + '"'
+        if not math.isnan(float(temperature)):
+            station_data += ', "temperature" : "' + temperature + '"'
     except ValueError:
         pass
 
