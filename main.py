@@ -30,6 +30,10 @@ def night():
 def get_station_data(config):
     name = config['station']['name']
 
+    latitude = config['station']['latitude']
+    longitude = config['station']['longitude']
+    height = config['station']['height']
+
     total_bytes, used_bytes, free_bytes = disk_usage(path.realpath('/'))
 
     disk_used = str(used_bytes / (10 ** 9))
@@ -40,6 +44,10 @@ def get_station_data(config):
               "disk_used"   : "{}",
               "disk_cap"    : "{}"
               '''.format(name, disk_used, disk_cap)
+
+    if len(latitude) > 0: station_data += ', "latitude" : "' + latitude + '"'
+    if len(longitude) > 0: station_data += ', "longitude" : "' + longitude + '"'
+    if len(height) > 0: station_data += ', "height" : "' + height + '"'
 
     humidity, temperature = ucontroller.get_dht_info()
 
