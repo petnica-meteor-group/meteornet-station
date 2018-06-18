@@ -36,10 +36,20 @@ function compile() {
     fi
 }
 
+STANDARD_OPTIONS="-shared -fPIC"
+
+# Linux 32-bit
+CC=gcc
+CXX=g++
+OPTIONS="$STANDARD_OPTIONS -m32"
+OUTPUT=ucontroller32.so
+
+compile
+
 # Linux 64-bit
 CC=gcc
 CXX=g++
-OPTIONS="-shared -fPIC"
+OPTIONS="$STANDARD_OPTIONS"
 OUTPUT=ucontroller64.so
 
 compile
@@ -47,7 +57,7 @@ compile
 # Windows 32-bit
 CC=i686-w64-mingw32-gcc
 CXX=i686-w64-mingw32-g++
-OPTIONS="$OPTIONS"
+OPTIONS="$STANDARD_OPTIONS"
 OUTPUT=ucontroller32.dll
 
 compile
@@ -55,7 +65,7 @@ compile
 # Windows 64-bit
 CC=x86_64-w64-mingw32-gcc
 CXX=x86_64-w64-mingw32-g++
-OPTIONS="$OPTIONS"
+OPTIONS="$STANDARD_OPTIONS"
 OUTPUT=ucontroller64.dll
 
 compile
