@@ -14,8 +14,11 @@ import sys
 
 try:
     import requests
-except ModuleNotFoundError:
-    from pip._internal import main
+except ImportError:
+    try:
+        from pip._internal import main
+    except ImportError:
+        from pip import main
     main(['install', 'requests'])
 
 # In minutes
