@@ -16,7 +16,7 @@ import traceback
 TELEMETRY_PERIOD_MIN = 60
 TELEMETRY_PERIOD_MAX = 120
 
-STATION_INFO_FILEPATH= path.dirname(path.realpath(__file__)) + '/station-info.cfg'
+STATION_INFO_FILEPATH = os.path.dirname(sys.argv[0]) + '/station-info.cfg'
 
 SERVER_URL = "http://localhost:8000"
 TELEMETRY_URL_REGISTER = SERVER_URL + "/station_register"

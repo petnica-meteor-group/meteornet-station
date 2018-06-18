@@ -2,10 +2,11 @@
 
 cd "${0%/*}"
 SCRIPT_DIR=$(pwd)
+PROJECT_NAME=$(basename $SCRIPT_DIR)
 
 rm -rf build
-mkdir -p build/$(basename $SCRIPT_DIR)
-cd build/$(basename $SCRIPT_DIR)
+BUILD_DIR=build/$PROJECT_NAME
+mkdir -p $BUILD_DIR
 
 function compile() {
     if [[ -x "$(command -v $CC)" && -x "$(command -v $CXX)" ]]; then
@@ -23,7 +24,7 @@ function compile() {
         $CXX $OPTIONS -c $cpp_file -o $(basename $cpp_file).o
     done
 
-    $CC $OPTIONS *.o -o $OUTPUT
+    $CC $OPTIONS *.o -o $BUILD_DIR/$OUTPUT
 
     success=$?
 
@@ -70,5 +71,16 @@ OUTPUT=ucontroller64.dll
 
 compile
 
-cp $SCRIPT_DIR/*.py .
-cp $SCRIPT_DIR/station-info.cfg .
+cp $SCRIPT_DIR/station-info.cfg $BUILD_DIR
+
+# Build for Linux
+mkdir -p $BUILD_DIR/temp
+pyinstaller --distpath $BUILD_DIR --workpath $BUILD_DIR/temp --onefile -n $PROJECT_NAME main.py
+rm -rf $BUILD_DIR/temp
+
+# Build for Windows
+mkdir -p $BUILD_DIR/temp
+wineconsole pyinstaller --distpath $BUILD_DIR --workpath $BUILD_DIR/temp --onefile -n $PROJECT_NAME main.py
+rm -rf $BUILD_DIR/temp
+
+rm $PROJECT_NAME.spec

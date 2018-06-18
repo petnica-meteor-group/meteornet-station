@@ -16,7 +16,7 @@ def check_errors(output):
 def init():
     global ucontroller
 
-    lib_path = path.dirname(path.realpath(__file__)) + "/ucontroller"
+    lib_path = os.path.dirname(sys.argv[0]) + "/ucontroller"
 
     # Check if 32 or 64 bit
     if sys.maxsize <= 2**32:
@@ -32,7 +32,7 @@ def init():
 
     if path.exists(lib_path):
         ucontroller = ctypes.cdll.LoadLibrary(lib_path)
-
+        
     if ucontroller == None:
         print("Unsupported platform.")
         return False
