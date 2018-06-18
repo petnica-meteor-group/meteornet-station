@@ -73,14 +73,16 @@ compile
 
 cp $SCRIPT_DIR/station-info.cfg $BUILD_DIR
 
+cp $SCRIPT_DIR/*.py $BUILD_DIR
+
 # Build for Linux
-mkdir -p $BUILD_DIR/temp
-pyinstaller --distpath $BUILD_DIR --workpath $BUILD_DIR/temp --onefile -n $PROJECT_NAME main.py
-rm -rf $BUILD_DIR/temp
+#mkdir -p $BUILD_DIR/temp
+#pyinstaller --clean --win-private-assemblies --distpath $BUILD_DIR --workpath $BUILD_DIR/temp --onefile -n $PROJECT_NAME main.py
+#rm -rf $BUILD_DIR/temp
 
 # Build for Windows
-mkdir -p $BUILD_DIR/temp
-wineconsole pyinstaller --distpath $BUILD_DIR --workpath $BUILD_DIR/temp --onefile -n $PROJECT_NAME main.py
-rm -rf $BUILD_DIR/temp
+#mkdir -p $BUILD_DIR/temp
+#wineconsole pyinstaller --clean --win-private-assemblies --distpath $BUILD_DIR --workpath $BUILD_DIR/temp --onefile -n $PROJECT_NAME main.py
+#rm -rf $BUILD_DIR/temp
 
-rm $PROJECT_NAME.spec
+#rm $PROJECT_NAME.spec

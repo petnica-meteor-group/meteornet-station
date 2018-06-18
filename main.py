@@ -8,9 +8,15 @@ from random import randint
 import math
 import time
 import configparser
-import requests
 import ucontroller
 import traceback
+import sys
+
+try:
+    import requests
+except ModuleNotFoundError:
+    from pip._internal import main
+    main(['install', 'requests'])
 
 # In minutes
 TELEMETRY_PERIOD_MIN = 60
