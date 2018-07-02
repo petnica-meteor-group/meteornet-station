@@ -119,7 +119,7 @@ def telemetry():
                     print("Registering station...")
 
                     data = { 'data' : data }
-                    request = requests.post(TELEMETRY_URL_REGISTER, data=data)
+                    request = requests.post(TELEMETRY_URL_REGISTER, data=data, verify=False)
                     id = request.text
 
                     print("Station registration successful.")
@@ -127,7 +127,7 @@ def telemetry():
                     print("Sending telemetry data...")
 
                     data = { 'id' : id, 'data' : data }
-                    request = requests.post(TELEMETRY_URL_UPDATE, data=data)
+                    request = requests.post(TELEMETRY_URL_UPDATE, data=data, verify=False)
 
                     print("Telemetry data sent successfully.")
 
@@ -150,7 +150,7 @@ def telemetry():
                         else:
                             error_data = {            'error' : str(e) }
 
-                        requests.post(ERROR_URL, data=error_data)
+                        requests.post(ERROR_URL, data=error_data, verify=False)
                         errors_sent.append(e)
 
                     print("Error(s) sent successfully.")
