@@ -27,7 +27,7 @@ TELEMETRY_PERIOD_MAX = 120
 
 STATION_INFO_FILEPATH = os.path.dirname(sys.argv[0]) + '/station-info.cfg'
 
-SERVER_URL = "http://localhost:8000"
+SERVER_URL = "https://91.187.128.236:1143"
 TELEMETRY_URL_REGISTER = SERVER_URL + "/station_register"
 TELEMETRY_URL_UPDATE   = SERVER_URL + "/station_update"
 ERROR_URL              = SERVER_URL + "/station_error"
