@@ -45,8 +45,8 @@ def get_station_data(config):
 
     total_bytes, used_bytes, free_bytes = disk_usage(path.realpath('/'))
 
-    disk_used = str(used_bytes / (10 ** 9))
-    disk_cap = str(total_bytes / (10 ** 9))
+    disk_used = str(used_bytes / (1024 ** 3))
+    disk_cap = str(total_bytes / (1024 ** 3))
 
     station_data = '''
               "name"        : "{}",
