@@ -7,16 +7,15 @@
 
 #define RESULT_BUFFER_SIZE 128
 
-const char *COMMAND_SENT_MSG = "Command sent.\n";
+const char *COMMAND_SENT_MSG = "INFO: Microcontroller command sent.";
 
-const char *CONNECTED_MSG = "Connected.\n";
-const char *DISCONNECTED_MSG = "Disconnected.\n";
+const char *CONNECTED_MSG = "INFO: Microcontroller connected.";
+const char *DISCONNECTED_MSG = "INFO: Microcontroller disconnected.";
 
-const char *ERROR_MISSING_ARGUMENT_MSG = "ERROR: Missing argument.\n";
-const char *ERROR_NOT_CONNECTED_MSG = "ERROR: Not connected.\n";
-const char *ERROR_DISCONNECTING_MSG = "ERROR: Did not properly disconnect.\n";
-const char *ERROR_SEND_MSG = "ERROR: Could not send.\n";
-const char *ERROR_RECEIVE_MSG = "ERROR: Could not receive.\n";
+const char *ERROR_NOT_CONNECTED_MSG = "ERROR: Microcontroller not connected.";
+const char *ERROR_DISCONNECTING_MSG = "ERROR: Microcontroller did not disconnect properly.";
+const char *ERROR_SEND_MSG = "ERROR: Could not send to microcontroller.";
+const char *ERROR_RECEIVE_MSG = "ERROR: Could not receive from microcontroller.";
 
 const char* init() {
     if (serial_init() != 0) {

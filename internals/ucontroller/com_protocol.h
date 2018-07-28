@@ -1,9 +1,3 @@
-/*
- * com_protocol.h
- *
- *  Copyleft 2018 Vladimir Nikolić
- */
-
 #ifndef COMM_PROTOCOL_H
 #define COMM_PROTOCOL_H
 

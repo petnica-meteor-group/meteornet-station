@@ -1,3 +1,3 @@
-[submodule "ucontroller/serial-com"]
-	path = ucontroller/serial-com
+[submodule "internals/ucontroller/serial-com"]
+	path = internals/ucontroller/serial-com
 	url = https://github.com/schutzekatze/serial-com

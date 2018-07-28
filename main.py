@@ -1,16 +1,8 @@
 #!/usr/bin/env python3
 
-import os
-from os import path
-from shutil import disk_usage
 from time import sleep
 from random import randint
-import math
 import time
-import configparser
-import ucontroller
-import traceback
-import sys
 
 try:
     import requests
@@ -21,149 +13,58 @@ except ImportError:
         from pip import main
     main(['install', 'requests'])
 
+from internals import station_control
+
 # In minutes
 TELEMETRY_PERIOD_MIN = 60
 TELEMETRY_PERIOD_MAX = 120
 
-STATION_INFO_FILEPATH = os.path.dirname(sys.argv[0]) + '/station-info.cfg'
-
-SERVER_URL = "https://91.187.128.236:1143"
-TELEMETRY_URL_REGISTER = SERVER_URL + "/station_register"
-TELEMETRY_URL_UPDATE   = SERVER_URL + "/station_update"
-ERROR_URL              = SERVER_URL + "/station_error"
-
-def night():
+def is_night():
     hours = float(time.strftime("%H"))
     return (19 <= hours <= 24) or (0 <= hours <= 7)
 
-def get_station_data(config):
-    name = config['station']['name']
+def delay():
+    sleep(randint(int(TELEMETRY_PERIOD_MIN * 60), int(TELEMETRY_PERIOD_MAX * 60)))
 
-    latitude = config['station']['latitude']
-    longitude = config['station']['longitude']
-    height = config['station']['height']
+def run():
+    initialized = False
+    registered = False
+    camera_on = not is_night()
 
-    total_bytes, used_bytes, free_bytes = disk_usage(path.realpath('/'))
-
-    disk_used = str(used_bytes / (1024 ** 3))
-    disk_cap = str(total_bytes / (1024 ** 3))
-
-    station_data = '''
-              "name"        : "{}",
-              "disk_used"   : "{}",
-              "disk_cap"    : "{}"
-              '''.format(name, disk_used, disk_cap)
-
-    if len(latitude) > 0: station_data += ', "latitude" : "' + latitude + '"'
-    if len(longitude) > 0: station_data += ', "longitude" : "' + longitude + '"'
-    if len(height) > 0: station_data += ', "height" : "' + height + '"'
-
-    humidity, temperature = ucontroller.get_dht_info()
+    print("INFO: Starting control & telemetry.")
 
     try:
-        if not math.isnan(float(humidity)):
-            station_data += ', "humidity" : "' + humidity + '"'
-    except ValueError:
-        pass
-
-    try:
-        if not math.isnan(float(temperature)):
-            station_data += ', "temperature" : "' + temperature + '"'
-    except ValueError:
-        pass
-
-    return station_data
-
-def get_host_data(config):
-    host_name = config['host']['name']
-    host_phone = config['host']['phone']
-    host_email = config['host']['email']
-    host_comment = config['host']['comment']
-
-    host_data = '"name" : "' + host_name + '"'
-    if len(host_phone) > 0: host_data += ', "phone" : "' + host_phone + '"'
-    if len(host_email) > 0: host_data += ', "email" : "' + host_email + '"'
-    if len(host_comment) > 0: host_data += ', "comment" : "' + host_comment + '"'
-
-    return host_data
-
-def telemetry():
-    if not ucontroller.init():
-        return
-
-    if night():
-        shutter_open, camera_on = ucontroller.camera_switch(True)
-    else:
-        shutter_open, camera_on = ucontroller.camera_switch(False)
-
-    id = None
-    errors = []
-    try:
-        print("Starting telemetry")
         while True:
-            try:
-                if night() and not camera_on:
-                    shutter_open, camera_on = ucontroller.camera_switch(True)
-                elif not night() and camera_on:
-                    shutter_open, camera_on = ucontroller.camera_switch(False)
+            if initialized:
+                if is_night() and not camera_on:
+                    camera_on = station_control.camera_switch(True)
+                    if not camera_on:
+                        print("ERROR: Could not turn camera on (it's night). Will retry later automatically.")
+                elif not is_night() and camera_on:
+                    camera_on = not station_control.camera_switch(False)
+                    if camera_on:
+                        print("ERROR: Could not turn camera off (it's day). Will retry later automatically.")
 
-                config = configparser.ConfigParser()
-                config.read(STATION_INFO_FILEPATH)
-
-                station_data = get_station_data(config)
-                host_data = get_host_data(config)
-
-                data = '{ ' + station_data + ', "host": {' + host_data + '} }'
-
-                if id == None:
-                    print("Registering station...")
-
-                    data = { 'data' : data }
-                    request = requests.post(TELEMETRY_URL_REGISTER, data=data, verify=False)
-                    id = request.text
-
-                    print("Station registration successful.")
+                if registered:
+                    station_control.server_send_info()
                 else:
-                    print("Sending telemetry data...")
+                    if station_control.server_register():
+                        registered = True
+                    else:
+                        print("WARNING: Could not register station. Will retry later automatically.")
+            else:
+                if station_control.init():
+                    initialized = True
+                    continue
+                else:
+                    print("ERROR: Could not initialize station. Will retry later automatically.")
 
-                    data = { 'id' : id, 'data' : data }
-                    request = requests.post(TELEMETRY_URL_UPDATE, data=data, verify=False)
+            delay()
 
-                    print("Telemetry data sent successfully.")
-
-            except requests.ConnectionError:
-                print("Could not connect to the server.")
-            except Exception as e:
-                print("\nERROR:")
-                trace = ''.join(traceback.format_tb(e.__traceback__)) + str(e)
-                print(trace + "\n")
-                errors.append(trace)
-
-            if len(errors) > 0:
-                print("Sending error(s) to the server...")
-                errors_sent = []
-
-                try:
-                    for e in errors:
-                        if id != None:
-                            error_data = { 'id' : id, 'error' : str(e) }
-                        else:
-                            error_data = {            'error' : str(e) }
-
-                        requests.post(ERROR_URL, data=error_data, verify=False)
-                        errors_sent.append(e)
-
-                    print("Error(s) sent successfully.")
-                except requests.ConnectionError:
-                    print("Could not connect to the server.")
-
-                errors = [e for e in errors if e not in errors_sent]
-
-            sleep(randint(int(TELEMETRY_PERIOD_MIN * 60), int(TELEMETRY_PERIOD_MAX * 60)))
     except KeyboardInterrupt:
-        print("Ending telemetry.")
+        print("INFO: Ending control & telemetry.")
 
-    ucontroller.end()
+    station_control.end()
 
 if __name__ == "__main__":
-    telemetry()
+    run()

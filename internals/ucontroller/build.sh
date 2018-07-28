@@ -1,39 +1,33 @@
 #!/bin/bash
 
 cd "${0%/*}"
-SCRIPT_DIR=$(pwd)
-PROJECT_NAME=$(basename $SCRIPT_DIR)
-
-rm -rf build
-BUILD_DIR=build/$PROJECT_NAME
-mkdir -p $BUILD_DIR
 
 function compile() {
     if [[ -x "$(command -v $CC)" && -x "$(command -v $CXX)" ]]; then
         echo "Compiling with: $CC and $CXX"
     else
-        echo "Unsupported compilers: $CC and $CXX"
+        echo "Unsupported compilers: $CC and/or $CXX"
         return
     fi
 
-    for c_file in $(find $SCRIPT_DIR/ucontroller -iname "*.c"); do
+    for c_file in $(find . -iname "*.c"); do
         $CC $OPTIONS -c $c_file -o $(basename $c_file).o
     done
 
-    for cpp_file in $(find $SCRIPT_DIR/ucontroller -iname "*.cpp"); do
+    for cpp_file in $(find . -iname "*.cpp"); do
         $CXX $OPTIONS -c $cpp_file -o $(basename $cpp_file).o
     done
 
-    $CC $OPTIONS *.o -o $BUILD_DIR/$OUTPUT
+    $CC $OPTIONS *.o -o $OUTPUT
 
     success=$?
 
     rm -f *.o
 
     if [[ $success -eq 0 ]]; then
-        echo "Done"
+        echo "Done."
     else
-        echo "Errors occured"
+        echo "Errors occurred."
     fi
 }
 
@@ -70,10 +64,6 @@ OPTIONS="$STANDARD_OPTIONS"
 OUTPUT=ucontroller64.dll
 
 compile
-
-cp $SCRIPT_DIR/station-info.cfg $BUILD_DIR
-
-cp $SCRIPT_DIR/*.py $BUILD_DIR
 
 # Build for Linux
 #mkdir -p $BUILD_DIR/temp

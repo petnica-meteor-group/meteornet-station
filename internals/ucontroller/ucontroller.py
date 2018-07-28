@@ -1,4 +1,4 @@
-from os import path
+from os.path import dirname, realpath, exists
 import ctypes
 import sys
 import os
@@ -10,13 +10,13 @@ class UControllerError(Exception):
 
 def check_errors(output):
     output = output.decode('utf-8')
-    if "ERROR" in output: raise UControllerError(output)
+    if "ERROR" in output: raise UControllerError(output.replace("ERROR: ", ""))
     return output
 
 def init():
     global ucontroller
 
-    lib_path = os.path.dirname(sys.argv[0]) + "/ucontroller"
+    lib_path = dirname(realpath(__file__)) + "/ucontroller"
 
     # Check if 32 or 64 bit
     if sys.maxsize <= 2**32:
@@ -30,12 +30,11 @@ def init():
     elif os.name == 'nt':
         lib_path += '.dll'
 
-    if path.exists(lib_path):
+    if exists(lib_path):
         ucontroller = ctypes.cdll.LoadLibrary(lib_path)
-        
+
     if ucontroller == None:
-        print("Unsupported platform.")
-        return False
+        raise UControllerError("ERROR: Unsupported platform.")
 
     ucontroller.init.restype = ctypes.c_char_p
     ucontroller.end.restype = ctypes.c_char_p
@@ -43,20 +42,13 @@ def init():
     ucontroller.send_cmd.restype = ctypes.c_char_p
 
     if ucontroller == None:
-        print("Error initializing microcontroller.")
-        return False
+        raise UControllerError("ERROR: Could not initialize microcontroller.")
 
-    output = ucontroller.init().decode('utf-8')
-    print(output, end='')
-    if "ERROR" in output:
-        return False
-    else:
-        return True
+    print(check_errors(ucontroller.init()))
 
 def end():
     global ucontroller
-
-    print(ucontroller.end().decode('utf-8'), end='')
+    print(check_errors(ucontroller.end()))
 
 def get_dht_info():
     global ucontroller
@@ -66,8 +58,10 @@ def get_dht_info():
     output = output.split('\n')[1].split(' ')
     humidity = output[0]
     temperature = output[1]
+    humidity = '30'
+    temperature = '20'
 
-    print("DHT returned humidity = {}, and temperature = {}".format(humidity, temperature))
+    print("INFO: Humidity = {}, Temperature = {}".format(humidity, temperature))
 
     return humidity, temperature
 
@@ -77,10 +71,8 @@ def camera_switch(turn_on):
     if turn_on:
         check_errors(ucontroller.send_cmd(0))
         check_errors(ucontroller.send_cmd(2))
+        print("INFO: Camera turned on")
     else:
         check_errors(ucontroller.send_cmd(1))
         check_errors(ucontroller.send_cmd(3))
-
-    print("Camera switched on")
-
-    return turn_on, turn_on
+        print("INFO: Camera turned off")
