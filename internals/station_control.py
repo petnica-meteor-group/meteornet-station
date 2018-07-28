@@ -25,7 +25,7 @@ def init():
         ucontroller.init()
         return True
     except Exception as e:
-        print("ERROR: " + str(e))
+        print("ERROR:\n" + get_trace(e))
         return False
 
 def end():
@@ -33,7 +33,7 @@ def end():
         ucontroller.end()
         return True
     except Exception as e:
-        print("ERROR: " + str(e))
+        print("ERROR:\n" + get_trace(e))
         return False
 
 def server_register():
@@ -41,7 +41,7 @@ def server_register():
         server.register(station_info.get())
         return True
     except Exception as e:
-        print("ERROR: " + str(e))
+        print("ERROR:\n" + get_trace(e))
         return False
 
 def server_send_info():
@@ -49,7 +49,7 @@ def server_send_info():
         server.send_info(station_info.get())
         return True
     except Exception as e:
-        print("ERROR: " + str(e))
+        print("ERROR:\n" + get_trace(e))
         server.send_error(get_trace(e))
         return False
 
@@ -58,6 +58,6 @@ def camera_switch(turn_on):
         ucontroller.camera_switch(turn_on)
         return True
     except Exception as e:
-        print("ERROR: " + str(e))
-        server.send_error(get_error(e))
+        print("ERROR:\n" + get_trace(e))
+        server.send_error(get_trace(e))
         return False

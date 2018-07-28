@@ -45,7 +45,7 @@ const char* send_cmd(int cmd) {
         if ((serial_receive((uint32_t*)&hum) != 0) || (serial_receive((uint32_t*)&temp) != 0)) {
             return ERROR_RECEIVE_MSG;
         } else {
-            sprintf(result + strlen(COMMAND_SENT_MSG), "%f %f\n", hum, temp);
+            sprintf(result + strlen(COMMAND_SENT_MSG), "\n%f %f", hum, temp);
         }
     }
 

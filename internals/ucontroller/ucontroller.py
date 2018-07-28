@@ -2,6 +2,7 @@ from os.path import dirname, realpath, exists
 import ctypes
 import sys
 import os
+import math
 
 ucontroller = None
 
@@ -55,11 +56,14 @@ def get_dht_info():
 
     output = check_errors(ucontroller.send_cmd(4))
 
-    output = output.split('\n')[1].split(' ')
-    humidity = output[0]
-    temperature = output[1]
-    humidity = '30'
-    temperature = '20'
+    output = output.split('\n')
+    if len(output) > 1: output = output[1].split(' ')
+    if len(output) > 1:
+        humidity = output[0]
+        temperature = output[1]
+    else:
+        humidity = math.nan
+        temperature = math.nan
 
     print("INFO: Humidity = {}, Temperature = {}".format(humidity, temperature))
 

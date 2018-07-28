@@ -16,8 +16,8 @@ except ImportError:
 from internals import station_control
 
 # In minutes
-TELEMETRY_PERIOD_MIN = 60
-TELEMETRY_PERIOD_MAX = 120
+TELEMETRY_PERIOD_MIN = 30
+TELEMETRY_PERIOD_MAX = 60
 
 def is_night():
     hours = float(time.strftime("%H"))
