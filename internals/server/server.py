@@ -1,4 +1,5 @@
 import requests
+import datetime
 
 SERVER_URL = "https://91.187.128.236:1143"
 URL_REGISTER = SERVER_URL + "/station_register"
@@ -51,7 +52,7 @@ def send_info(info):
     try:
         flush_errors()
 
-        print("INFO: Sending station information...")
+        print("INFO: Sending station information... ({})".format(datetime.datetime.now()))
         if id == None:
             print("ERROR: Station not registered.")
             return
