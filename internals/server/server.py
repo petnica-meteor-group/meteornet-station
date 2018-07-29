@@ -36,7 +36,7 @@ def register(info):
     global id
 
     try:
-        print("INFO: Registering station...")
+        print("INFO: Registering station... ({})".format(datetime.datetime.now().replace(microsecond=0)))
 
         data = { 'data' : info }
         request = requests.post(URL_REGISTER, data=data, verify=False)
@@ -52,7 +52,7 @@ def send_info(info):
     try:
         flush_errors()
 
-        print("INFO: Sending station information... ({})".format(datetime.datetime.now()))
+        print("INFO: Sending station information... ({})".format(datetime.datetime.now().replace(microsecond=0)))
         if id == None:
             print("ERROR: Station not registered.")
             return
