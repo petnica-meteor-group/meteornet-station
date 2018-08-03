@@ -1,7 +1,7 @@
 import requests
 import datetime
 
-SERVER_URL = "https://91.187.128.236:1143"
+SERVER_URL = "https://meteori.petnica.rs:1143"
 URL_REGISTER = SERVER_URL + "/station_register"
 URL_UPDATE   = SERVER_URL + "/station_update"
 URL_ERROR    = SERVER_URL + "/station_error"
