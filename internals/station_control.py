@@ -29,11 +29,15 @@ def do_work(info_uploader, station_config, ucontroller, camera_on, errors_and_ti
 
     if is_night() and not camera_on:
         ucontroller.camera_switch(True)
+        camera_on = True
     elif not is_night() and camera_on:
         ucontroller.camera_switch(False)
+        camera_on = False
+
+    return camera_on
 
 def run():
-    format = '[%(levelname)-7s] %(name)24s: %(message)-80s (%(asctime)s)'
+    format = '[%(asctime)s] [%(levelname)-7s] %(name)30s: %(message)-80s'
     datefmt = '%Y/%m/%d %H:%M:%S'
     if constants.DEBUG:
         level=logging.DEBUG
@@ -71,7 +75,7 @@ def run():
 
                             with InfoUploader(constants.URL_INFO, constants.URL_ERROR, id) as info_uploader:
                                 while True:
-                                    do_work(info_uploader, station_config, ucontroller, camera_on, errors_and_timestamps)
+                                    camera_on = do_work(info_uploader, station_config, ucontroller, camera_on, errors_and_timestamps)
                                     sleep()
 
                                     if updater.update_required():

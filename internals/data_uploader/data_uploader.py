@@ -3,10 +3,6 @@ class DataUploader:
     def __init__(self):
         pass
 
-    @staticmethod
-    def get_temp_filelist():
-        return []
-
     def end(self):
         pass
 

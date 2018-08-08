@@ -85,10 +85,6 @@ class InfoUploader:
         requests.post(url, data=data_all, verify=False).raise_for_status()
         self.logger.info(end_msg)
 
-    @staticmethod
-    def get_temp_filelist():
-        return [QUEUE_FILENAME]
-
     def end(self):
         with self.queue_lock:
             self.ended = True

@@ -94,10 +94,6 @@ class UController:
             self.logger.debug(output.replace("DEBUG: ", ""))
         return output
 
-    @staticmethod
-    def get_temp_filelist():
-        return []
-
     def end(self):
         if self.emulate:
             self.logger.debug("Emulated microcontroller disconnected.")

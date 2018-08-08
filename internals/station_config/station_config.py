@@ -59,10 +59,6 @@ class StationConfig:
             except ValueError:
                 print("Invalid input, try again.")
 
-    @staticmethod
-    def get_temp_filelist():
-        return []
-
     def end(self):
         pass
 
