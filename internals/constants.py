@@ -27,7 +27,7 @@ PRESERVE_FILES = [ STATION_INFO_FILENAME, 'info_uploader/' + info_uploader.QUEUE
 if DEBUG:
     SERVER_URL = "http://0.0.0.0:8000"
 else:
-    SERVER_URL = "https://91.187.128.236:1143"
+    SERVER_URL = "https://meteori.petnica.rs:1143"
 URL_REGISTER = SERVER_URL + "/station_register"
 URL_INFO     = SERVER_URL + "/station_info"
 URL_ERROR    = SERVER_URL + "/station_error"
