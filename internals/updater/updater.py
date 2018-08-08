@@ -27,7 +27,7 @@ class Updater:
 
         if path.exists(self.project_path_old):
             for file in preserve_files:
-                if path.exists(path.join(self.project_path_old, file):
+                if path.exists(path.join(self.project_path_old, file)):
                     shutil.copyfile(path.join(self.project_path_old, file), path.join(self.project_path, file))
 
             shutil.rmtree(self.project_path_old)
