@@ -14,7 +14,8 @@ class InfoUploader:
         self.id = id
         self.info_url = info_url
         self.error_url = error_url
-        if os.path.exists(QUEUE_FILENAME):
+        self.queue_path = os.path.join(os.path.dirname(__file__), QUEUE_FILENAME)
+        if os.path.exists(self.queue_path):
             self._load_queue()
         else:
             self.queue = collections.deque()
@@ -37,16 +38,16 @@ class InfoUploader:
             self.queue_condition.notify()
 
     def _store_queue(self):
-        with open(QUEUE_FILENAME, 'w') as outfile:
+        with open(self.queue_path, 'w') as outfile:
             json.dump(list(self.queue), outfile)
 
     def _load_queue(self):
         try:
-            with open(QUEUE_FILENAME, 'r') as infile:
+            with open(self.queue_path, 'r') as infile:
                 self.queue = collections.deque(json.load(infile))
         except json.JSONDecodeError:
             self.queue = collections.deque()
-            os.remove(QUEUE_FILENAME)
+            os.remove(self.queue_path)
 
     def _loop(self):
         while True:
