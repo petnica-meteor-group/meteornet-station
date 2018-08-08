@@ -33,23 +33,27 @@ class Updater:
             self.logger.info("Switched to new version. Update successful.")
 
     def update_required(self):
-        return False
-
         try:
-            response = requests.get(self.version_url)
+            self.logger.info("Checking for updates...")
+            response = requests.post(self.version_url, verify=False)
             response.raise_for_status()
-            return self.version < response.text
+            if self.version < response.text:
+                self.logger.info("Update available.")
+                return True
+            else:
+                self.logger.info("Station is up-to-date.")
+                return False
         except requests.exceptions.ConnectionError:
-            logger.warning("Could not connect to the update server.")
+            self.logger.warning("Could not connect to the update server.")
         except requests.exceptions.RequestException:
-            logger.warning("The update server returned an error.")
+            self.logger.warning("The update server returned an error.")
         return False
 
     def update(self):
         try:
             self.logger.info("Starting update process. Downloading...")
 
-            response = requests.get(self.zip_url, stream=True)
+            response = requests.post(self.zip_url, stream=True, verify=False)
             response.raise_for_status()
 
             zip_filename = self.project_name + ".zip"

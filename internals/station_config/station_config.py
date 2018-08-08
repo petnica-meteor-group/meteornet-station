@@ -36,7 +36,7 @@ class StationConfig:
                 print()
 
                 # Save config to file
-                with open(config_ath, 'w') as config_file:
+                with open(config_path, 'w') as config_file:
                     self.config.write(config_file)
             except KeyboardInterrupt:
                 print()
