@@ -63,22 +63,24 @@ class InfoUploader:
                         self._store_queue()
                 except requests.exceptions.ConnectionError:
                     self.logger.warning("Could not connect to server. Retrying in {} minutes.".format(str(self.retry_delay)))
+                    self.queue.appendleft((data, timestamp, error))
                 except requests.exceptions.RequestException as e:
                     self.logger.warning("Server connection returned an error ({}). Retrying in {} minutes.".format(
                         str(e),
                         str(self.retry_delay))
                     )
+                    self.queue.appendleft((data, timestamp, error))
                 self.queue_condition.wait(timeout=self.retry_delay)
 
     def _upload(self, data, timestamp, error=False):
         if error:
-            data_all = { 'id' : self.id, 'data' : json.dumps(data), 'timestamp' : timestamp }
-            url = self.info_url
+            data_all = { 'id' : self.id, 'error' : json.dumps(data), 'timestamp' : timestamp }
+            url = self.error_url
             start_msg = "Sending an error to the server..."
             end_msg = "Error sent successfully."
         else:
-            data_all = { 'id' : self.id, 'error' : json.dumps(data), 'timestamp' : timestamp }
-            url = self.error_url
+            data_all = { 'id' : self.id, 'data' : json.dumps(data), 'timestamp' : timestamp }
+            url = self.info_url
             start_msg = "Sending info to the server..."
             end_msg = "Info sent successfully."
 
