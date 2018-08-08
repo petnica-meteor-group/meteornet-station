@@ -70,6 +70,9 @@ def run():
                                     if id == None:
                                         logger.warning("Failed to register. Will retry later.")
                                         sleep()
+
+                                        if updater.update_required():
+                                            break
                                     else:
                                         break
 

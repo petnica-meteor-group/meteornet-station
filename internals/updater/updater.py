@@ -27,7 +27,8 @@ class Updater:
 
         if path.exists(self.project_path_old):
             for file in preserve_files:
-                shutil.copyfile(path.join(self.project_path_old, file), path.join(self.project_path, file))
+                if path.exists(path.join(self.project_path_old, file):
+                    shutil.copyfile(path.join(self.project_path_old, file), path.join(self.project_path, file))
 
             shutil.rmtree(self.project_path_old)
             self.logger.info("Switched to new version. Update successful.")
@@ -64,9 +65,11 @@ class Updater:
 
             self.logger.debug("Unzipping update.")
             zip = zipfile.ZipFile(zip_filename, 'r')
+            extracted = zip.namelist()[0]
             zip.extractall(self.project_parent_path)
             zip.close()
             os.remove(zip_filename)
+            os.rename(path.join(self.project_parent_path, extracted), path.join(self.project_parent_path, self.project_name))
 
             os.chmod(self.main_path, os.stat(self.main_path).st_mode | stat.S_IEXEC)
 
