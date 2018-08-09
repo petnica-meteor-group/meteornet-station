@@ -15,8 +15,12 @@ def sleep():
     time.sleep(delay)
 
 def is_night():
-    hours = float(time.strftime("%H"))
-    return (constants.NIGHT_START <= hours <= 24) or (0 <= hours <= constants.NIGHT_END)
+    current_time = float(time.strftime('%H:%M'))
+    return (constants.NIGHT_START <= current_time <= constants.NIGHT_END) or \
+           ( \
+               ((constants.NIGHT_START <= current_time) or (current_time <= costants.NIGHT_END)) and \
+                 constants.NIGHT_END < constants.NIGHT_START \
+            )
 
 def get_trace(exception):
     return str(''.join(traceback.format_tb(exception.__traceback__))) + str(exception)
