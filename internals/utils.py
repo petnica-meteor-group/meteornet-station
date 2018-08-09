@@ -15,7 +15,7 @@ def sleep():
     time.sleep(delay)
 
 def is_night():
-    current_time = float(time.strftime('%H:%M'))
+    current_time = time.strftime('%H:%M')
     return (constants.NIGHT_START <= current_time <= constants.NIGHT_END) or \
            ( \
                ((constants.NIGHT_START <= current_time) or (current_time <= costants.NIGHT_END)) and \
@@ -72,13 +72,13 @@ def get_info(station_config, ucontroller):
 
     return station_info
 
-def register(station_config, ucontroller):
+def register(data):
     logger = logging.getLogger("Utils")
 
     try:
         logger.info("Registering station...")
 
-        data = { 'data' : json.dumps(get_info(station_config, ucontroller)) }
+        data = { 'data' : json.dumps(data) }
         response = requests.post(constants.URL_REGISTER, data=data, verify=False)
         response.raise_for_status()
 

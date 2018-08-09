@@ -10,8 +10,8 @@ QUEUE_FILENAME = 'queue.json'
 
 class InfoUploader:
 
-    def __init__(self, info_url, error_url, id, retry_delay=60):
-        self.id = id
+    def __init__(self, info_url, error_url, station_id=None, retry_delay=60):
+        self.station_id = station_id
         self.info_url = info_url
         self.error_url = error_url
         self.queue_path = os.path.join(os.path.dirname(__file__), QUEUE_FILENAME)
@@ -26,6 +26,11 @@ class InfoUploader:
         self.logger = logging.getLogger(self.__class__.__name__)
         self.worker = threading.Thread(target=InfoUploader._loop, args=(self,))
         self.worker.start()
+
+    def set_station_id(self, id):
+        with self.queue_lock:
+            self.station_id = id
+            self.queue_condition.notify()
 
     def queue_info(self, info, timestamp):
         with self.queue_lock:
@@ -56,30 +61,32 @@ class InfoUploader:
                     if self.ended:
                         self._store_queue()
                         break
-                    elif len(self.queue) > 0:
+                    elif len(self.queue) > 0 and self.station_id != None:
                         while len(self.queue) > 0:
                             data, timestamp, error = self.queue.popleft()
                             self._upload(data, timestamp, error)
                         self._store_queue()
+                    self.queue_condition.wait()
                 except requests.exceptions.ConnectionError:
                     self.logger.warning("Could not connect to server. Retrying in {} minutes.".format(str(self.retry_delay)))
                     self.queue.appendleft((data, timestamp, error))
+                    self.queue_condition.wait(timeout=self.retry_delay)
                 except requests.exceptions.RequestException as e:
                     self.logger.warning("Server connection returned an error ({}). Retrying in {} minutes.".format(
                         str(e),
                         str(self.retry_delay))
                     )
                     self.queue.appendleft((data, timestamp, error))
-                self.queue_condition.wait(timeout=self.retry_delay)
+                    self.queue_condition.wait(timeout=self.retry_delay)
 
     def _upload(self, data, timestamp, error=False):
         if error:
-            data_all = { 'id' : self.id, 'error' : json.dumps(data), 'timestamp' : timestamp }
+            data_all = { 'id' : self.station_id, 'error' : json.dumps(data), 'timestamp' : timestamp }
             url = self.error_url
             start_msg = "Sending an error to the server..."
             end_msg = "Error sent successfully."
         else:
-            data_all = { 'id' : self.id, 'data' : json.dumps(data), 'timestamp' : timestamp }
+            data_all = { 'id' : self.station_id, 'data' : json.dumps(data), 'timestamp' : timestamp }
             url = self.info_url
             start_msg = "Sending info to the server..."
             end_msg = "Info sent successfully."

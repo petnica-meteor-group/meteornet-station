@@ -48,8 +48,7 @@ def run():
     logger = logging.getLogger("StationControl")
     logger.info("Starting control & telemetry")
 
-    registered = False
-    id = None
+    station_id = None
     update_failed = False
     camera_on = not is_night()
     errors_and_timestamps = []
@@ -63,26 +62,21 @@ def run():
                     else:
                         update_failed = False
                         with StationConfig(constants.STATION_INFO_FILEPATH) as station_config, \
-                             UController(constants.DEBUG) as ucontroller:
+                             UController(constants.EMULATE_MICROCONTROLLER) as ucontroller, \
+                             InfoUploader(constants.URL_INFO, constants.URL_ERROR) as info_uploader:
                             while True:
-                                if not registered:
-                                    id = register(station_config, ucontroller)
-                                    if id == None:
+                                if station_id == None:
+                                    station_id = register(get_info(station_config, ucontroller))
+                                    if station_id == None:
                                         logger.warning("Failed to register. Will retry later.")
-                                        sleep()
-
-                                        if updater.update_required():
-                                            break
                                     else:
-                                        break
+                                        info_uploader.set_station_id(station_id)
+                                camera_on = do_work(info_uploader, station_config, ucontroller, \
+                                                    camera_on, errors_and_timestamps)
+                                sleep()
 
-                            with InfoUploader(constants.URL_INFO, constants.URL_ERROR, id) as info_uploader:
-                                while True:
-                                    camera_on = do_work(info_uploader, station_config, ucontroller, camera_on, errors_and_timestamps)
-                                    sleep()
-
-                                    if updater.update_required():
-                                        break
+                                if updater.update_required():
+                                    break
 
                         updater.update()
                 except UpdateFailed:
