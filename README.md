@@ -1,10 +1,20 @@
 Meteor Network Station
 =====
 
-An automated meteor station software for Petnica Meteor Network. The automation includes turning camera on at night and off in the morning, opening and closing camera shutter, measuring outside temperature and humidity, and sending this information to a central server that overviews the whole network.
+An automated meteor station software for Petnica Meteor Network. The automation right now includes:
+- Turning the camera on at night and off in the morning
+- Opening and closing the camera shutter
+- Measuring camera compartment temperature and humidity
+- Self update
+- Sending information to a central server that overviews the whole network.
+
+Planned automations:
+- Garbage meteor data cleanup
+- Meteor data upload to central server
+- Cloudiness estimation
 
 Running
 =====
 
 Code has been tested on Linux and Windows, both 32 and 64 bit.
-To run, place the project on the partition where meteor data will be stored and execute main.py with administrator privileges. (Requires Python 3.5+).
+To run, place the project on the partition where meteor data will be stored and execute main.py with administrator privileges. (Requires Python 3.4+).

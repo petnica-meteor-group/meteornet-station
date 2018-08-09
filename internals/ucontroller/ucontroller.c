@@ -7,10 +7,10 @@
 
 #define RESULT_BUFFER_SIZE 128
 
-const char *COMMAND_SENT_MSG = "INFO: Microcontroller command sent.";
+const char *COMMAND_SENT_MSG = "DEBUG: Microcontroller command sent.";
 
-const char *CONNECTED_MSG = "INFO: Microcontroller connected.";
-const char *DISCONNECTED_MSG = "INFO: Microcontroller disconnected.";
+const char *CONNECTED_MSG = "DEBUG: Microcontroller connected.";
+const char *DISCONNECTED_MSG = "DEBUG: Microcontroller disconnected.";
 
 const char *ERROR_NOT_CONNECTED_MSG = "ERROR: Microcontroller not connected.";
 const char *ERROR_DISCONNECTING_MSG = "ERROR: Microcontroller did not disconnect properly.";

@@ -3,80 +3,105 @@ import ctypes
 import sys
 import os
 import math
-
-ucontroller = None
+import logging
 
 class UControllerError(Exception):
     pass
 
-def check_errors(output):
-    output = output.decode('utf-8')
-    if "ERROR" in output: raise UControllerError(output.replace("ERROR: ", ""))
-    return output
+class UController:
 
-def init():
-    global ucontroller
+    def __init__(self, emulate=False):
+        self.ucontroller = None
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.emulate = emulate
 
-    lib_path = dirname(realpath(__file__)) + "/ucontroller"
+        lib_path = dirname(realpath(__file__)) + '/ucontroller'
 
-    # Check if 32 or 64 bit
-    if sys.maxsize <= 2**32:
-        lib_path += "32"
-    else:
-        lib_path += "64"
+        # Check if 32 or 64 bit
+        if sys.maxsize <= 2**32:
+            lib_path += '32'
+        else:
+            lib_path += '64'
 
-    # Check OS
-    if os.name == 'posix':
-        lib_path += '.so'
-    elif os.name == 'nt':
-        lib_path += '.dll'
+        # Check OS
+        if os.name == 'posix':
+            lib_path += '.so'
+        elif os.name == 'nt':
+            lib_path += '.dll'
 
-    if exists(lib_path):
-        ucontroller = ctypes.cdll.LoadLibrary(lib_path)
+        if exists(lib_path):
+            self.ucontroller = ctypes.cdll.LoadLibrary(lib_path)
+        else:
+            error = "Unsupported platform."
+            self.logger.error(error)
+            raise UControllerError(error)
 
-    if ucontroller == None:
-        raise UControllerError("ERROR: Unsupported platform.")
+        if self.ucontroller == None:
+            error = "Could not initialize microcontroller."
+            self.logger.error(error)
+            raise UControllerError(error)
 
-    ucontroller.init.restype = ctypes.c_char_p
-    ucontroller.end.restype = ctypes.c_char_p
-    ucontroller.send_cmd.argtypes = (ctypes.c_int,)
-    ucontroller.send_cmd.restype = ctypes.c_char_p
+        self.ucontroller.init.restype = ctypes.c_char_p
+        self.ucontroller.end.restype = ctypes.c_char_p
+        self.ucontroller.send_cmd.argtypes = (ctypes.c_int,)
+        self.ucontroller.send_cmd.restype = ctypes.c_char_p
 
-    if ucontroller == None:
-        raise UControllerError("ERROR: Could not initialize microcontroller.")
+        if self.emulate:
+            self.logger.debug("Emulated microcontrolled connected.")
+        else:
+            self._process_output(self.ucontroller.init())
 
-    print(check_errors(ucontroller.init()))
+    def get_dht_info(self):
+        if self.emulate:
+            output = "Command sent.\n50 30"
+        else:
+            output = self._process_output(self.ucontroller.send_cmd(4))
 
-def end():
-    global ucontroller
-    print(check_errors(ucontroller.end()))
+        output = output.split('\n')
+        if len(output) > 1: output = output[1].split(' ')
+        if len(output) > 1:
+            humidity = output[0]
+            temperature = output[1]
+        else:
+            humidity = math.nan
+            temperature = math.nan
 
-def get_dht_info():
-    global ucontroller
+        self.logger.info("Humidity = {}, Temperature = {}".format(humidity, temperature))
 
-    output = check_errors(ucontroller.send_cmd(4))
+        return humidity, temperature
 
-    output = output.split('\n')
-    if len(output) > 1: output = output[1].split(' ')
-    if len(output) > 1:
-        humidity = output[0]
-        temperature = output[1]
-    else:
-        humidity = math.nan
-        temperature = math.nan
+    def camera_switch(self, turn_on):
+        if turn_on:
+            if not self.emulate:
+                self._process_output(self.ucontroller.send_cmd(0))
+                self._process_output(self.ucontroller.send_cmd(2))
+            self.logger.info("Camera turned on.")
+        else:
+            if not self.emulate:
+                self._process_output(self.ucontroller.send_cmd(1))
+                self._process_output(self.ucontroller.send_cmd(3))
+            self.logger.info("Camera turned off.")
 
-    print("INFO: Humidity = {}, Temperature = {}".format(humidity, temperature))
+    def _process_output(self, output):
+        output = output.decode('utf-8')
+        if "ERROR: " in output:
+            error = output.replace("ERROR: ", "")
+            self.logger.error(error)
+            raise UControllerError(error)
+        elif "INFO: " in output:
+            self.logger.info(output.replace("INFO: ", ""))
+        elif "DEBUG: " in output:
+            self.logger.debug(output.replace("DEBUG: ", ""))
+        return output
 
-    return humidity, temperature
+    def end(self):
+        if self.emulate:
+            self.logger.debug("Emulated microcontroller disconnected.")
+        else:
+            self._process_output(self.ucontroller.end())
 
-def camera_switch(turn_on):
-    global ucontroller
+    def __enter__(self):
+        return self
 
-    if turn_on:
-        check_errors(ucontroller.send_cmd(0))
-        check_errors(ucontroller.send_cmd(2))
-        print("INFO: Camera turned on")
-    else:
-        check_errors(ucontroller.send_cmd(1))
-        check_errors(ucontroller.send_cmd(3))
-        print("INFO: Camera turned off")
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.end()
