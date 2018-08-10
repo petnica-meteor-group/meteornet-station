@@ -64,7 +64,7 @@ class Updater:
             zip.extractall(self.project_path)
             zip.close()
             os.remove(zip_filename)
-            os.rename(path.join(self.project_path, extracted), self.project_path_temp)
+            os.rename(join(self.project_path, extracted), self.project_path_temp)
 
             for file in self.preserve_files:
                 if exists(join(self.project_path, file)):
