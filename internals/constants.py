@@ -20,9 +20,11 @@ VERSION = '1.0.0.3'
 STATION_INFO_FILENAME = 'station_info.cfg'
 STATION_INFO_FILEPATH = PROJECT_PATH + '/' + STATION_INFO_FILENAME
 
+# hh:mm format
 NIGHT_START = '19:00'
 NIGHT_END = '06:30'
 
+# Preserve the following station specific files after update
 PRESERVE_FILES = [ STATION_INFO_FILENAME, 'info_uploader/' + info_uploader.QUEUE_FILENAME ]
 
 if DEBUG:
