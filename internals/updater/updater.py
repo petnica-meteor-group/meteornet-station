@@ -4,8 +4,10 @@ import shutil
 import requests
 import zipfile
 import stat
-from os import path
+from os.path import basename, dirname, join, exists
 import logging
+
+BOOTSTRAPPER_FILENAME = 'bootstapper.py'
 
 class UpdateFailed(Exception):
     pass
@@ -14,27 +16,18 @@ class Updater:
 
     def __init__(self, project_path, main_path_inner, zip_url, preserve_files, version, version_url):
         self.project_path = project_path
-        self.project_name = path.basename(self.project_path)
-        if self.project_path[-1] == '~':
-            self.project_path_other = self.project_path[:-1]
-        else:
-            self.project_path_other = self.project_path + '~'
-
-        self.main_path = path.join(self.project_path, main_path_inner)
-        self.main_path_other = path.join(self.project_path_other, main_path_inner)
-
+        self.project_name = basename(self.project_path)
+        self.project_path_temp = self.project_path + '~'
+        self.main_path = join(self.project_path, main_path_inner)
         self.zip_url = zip_url
+        self.preserve_files = preserve_files
         self.version = version
         self.version_url = version_url
 
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        if path.exists(self.project_path_other):
-            for file in preserve_files:
-                if path.exists(path.join(self.project_path_other, file)):
-                    shutil.copyfile(path.join(self.project_path_other, file), path.join(self.project_path, file))
-
-            shutil.rmtree(self.project_path_other)
+        if exists(join(dirname(self.project_path), BOOTSTRAPPER_FILENAME)):
+            os.remove(join(dirname(self.project_path), BOOTSTRAPPER_FILENAME))
             self.logger.info("Switched to new version. Update successful.")
 
     def update_required(self):
@@ -71,12 +64,18 @@ class Updater:
             zip.extractall(self.project_path)
             zip.close()
             os.remove(zip_filename)
-            os.rename(path.join(self.project_path, extracted), self.project_path_other)
+            os.rename(path.join(self.project_path, extracted), self.project_path_temp)
 
-            os.chmod(self.main_path_other, os.stat(self.main_path_other).st_mode | stat.S_IEXEC)
+            for file in self.preserve_files:
+                if exists(join(self.project_path, file)):
+                    shutil.copyfile(join(self.project_path, file), join(self.project_path_temp, file))
+
+            bootstrapper_path = join(dirname(self.project_path), BOOTSTRAPPER_FILENAME)
+            shutil.copyfile(join(dirname(__file__), BOOTSTRAPPER_FILENAME), bootstrapper_path)
 
             self.logger.info("Update downloaded, switching to new version...")
-            os.execlp(self.main_path_other, self.main_path_other)
+            os.execv(sys.executable, [ sys.executable, bootstrapper_path,
+                                       self.project_path, self.project_path_temp, self.main_path])
         except requests.exceptions.ConnectionError:
             warning = "Could not connect to the update server."
             self.logger.warning(warning)

@@ -2,7 +2,7 @@ from os.path import dirname
 from .info_uploader import info_uploader
 import platform
 
-DEBUG = False
+DEBUG = True
 EMULATE_MICROCONTROLLER = DEBUG
 
 # In minutes
@@ -16,7 +16,7 @@ else:
 PROJECT_PATH = dirname(dirname(__file__))
 MAIN_FILENAME = 'start.py'
 
-VERSION = '1.0.0.5'
+VERSION = '1.0.0.6'
 
 STATION_INFO_FILENAME = 'station_info.cfg'
 STATION_INFO_FILEPATH = PROJECT_PATH + '/' + STATION_INFO_FILENAME
