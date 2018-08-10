@@ -24,5 +24,5 @@ for file in os.listdir(temp_dir):
         shutil.copytree(path, to_path)
 shutil.rmtree(temp_dir)
 
-os.chmod(self.main_path, os.stat(self.main_path).st_mode | stat.S_IEXEC)
+os.chmod(main_path, os.stat(main_path).st_mode | stat.S_IEXEC)
 os.execv(sys.executable, [ sys.executable, main_path ])
