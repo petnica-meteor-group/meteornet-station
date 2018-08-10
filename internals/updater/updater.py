@@ -14,7 +14,6 @@ class Updater:
 
     def __init__(self, project_path, main_path_inner, zip_url, preserve_files, version, version_url):
         self.project_path = project_path
-        self.project_name = path.basename(self.project_path)
         if self.project_path[-1] == '~':
             self.project_path_other = self.project_path[:-1]
         else:
@@ -22,6 +21,7 @@ class Updater:
 
         self.main_path = path.join(self.project_path, main_path_inner)
         self.main_path_other = path.join(self.project_path_other, main_path_inner)
+
         self.zip_url = zip_url
         self.version = version
         self.version_url = version_url
