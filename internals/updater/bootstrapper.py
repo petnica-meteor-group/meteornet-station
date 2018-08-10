@@ -3,6 +3,7 @@
 import sys
 import os
 import shutil
+import stat
 
 original_dir = sys.argv[1]
 temp_dir = sys.argv[2]
