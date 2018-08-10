@@ -18,7 +18,7 @@ def is_night():
     current_time = time.strftime('%H:%M')
     return (constants.NIGHT_START <= current_time <= constants.NIGHT_END) or \
            ( \
-               ((constants.NIGHT_START <= current_time) or (current_time <= costants.NIGHT_END)) and \
+               ((constants.NIGHT_START <= current_time) or (current_time <= constants.NIGHT_END)) and \
                  constants.NIGHT_END < constants.NIGHT_START \
             )
 
