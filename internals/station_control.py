@@ -56,41 +56,47 @@ def run():
         try:
             with Updater(constants.PROJECT_PATH, constants.MAIN_FILENAME, constants.URL_UPDATE,
                         constants.PRESERVE_FILES, constants.VERSION, constants.URL_VERSION) as updater:
-                try:
-                    if not update_failed and updater.update_required():
-                        updater.update()
-                    else:
-                        update_failed = False
-                        with StationConfig(constants.STATION_INFO_FILEPATH) as station_config, \
-                             UController(constants.EMULATE_MICROCONTROLLER) as ucontroller, \
-                             InfoUploader(constants.URL_INFO, constants.URL_ERROR) as info_uploader:
-                            while True:
-                                if station_id == None:
-                                    station_id = register(get_info(station_config, ucontroller))
-                                    if station_id == None:
-                                        logger.warning("Failed to register. Will retry later.")
-                                    else:
-                                        info_uploader.set_station_id(station_id)
-                                camera_on = do_work(info_uploader, station_config, ucontroller, \
-                                                    camera_on, errors_and_timestamps)
+                if not update_failed and updater.update_required():
+                    updater.update()
+                else:
+                    needs_update = False
+                    update_failed = False
+                    with StationConfig(constants.STATION_INFO_FILEPATH) as station_config, \
+                         InfoUploader(constants.URL_INFO, constants.URL_ERROR) as info_uploader:
+                        while not needs_update:
+                            try:
+                                with UController(constants.EMULATE_MICROCONTROLLER) as ucontroller:
+                                    while not needs_update:
+                                        if station_id == None:
+                                            station_id = register(get_info(station_config, ucontroller))
+                                            if station_id == None:
+                                                logger.warning("Failed to register. Will retry later.")
+                                            else:
+                                                info_uploader.set_station_id(station_id)
+                                        camera_on = do_work(info_uploader, station_config, ucontroller, \
+                                                            camera_on, errors_and_timestamps)
+                                        sleep()
+
+                                        if updater.update_required():
+                                            needs_update = True
+                            except UControllerError as e:
+                                logger.error("UController threw an error: " + e)
+                                info_uploader.queue_error(e, int(time.time()))
+                                logger.info("Will try to reinitialize UController later.")
                                 sleep()
 
-                                if updater.update_required():
-                                    break
-
-                        updater.update()
-                except UpdateFailed:
-                    update_failed = True
-                    logger.warning("Update failed. Continuing with old version.")
-
+                    updater.update()
         except KeyboardInterrupt:
             logger.info("Ending control & telemetry")
             break
+        except UpdateFailed:
+            update_failed = True
+            logger.warning("Update failed. Continuing with old version.")
         except Exception as e:
             logger.error("Unhandled exception occured:")
             print(get_trace(e))
             errors_and_timestamps.append((get_trace(e), int(time.time())))
-            logger.error("Waiting before restart.")
+            logger.info("Waiting before restart.")
             try:
                 sleep()
             except KeyboardInterrupt:
