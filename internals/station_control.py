@@ -37,7 +37,7 @@ def do_work(info_uploader, station_config, ucontroller, camera_on, errors_and_ti
     return camera_on
 
 def run():
-    format = '[%(asctime)s] [%(levelname)-7s] %(name)30s: %(message)-80s'
+    format = '[%(asctime)s] [%(levelname)-7s] %(name)s: %(message)s'
     datefmt = '%Y/%m/%d %H:%M:%S'
     if constants.DEBUG:
         level=logging.DEBUG
