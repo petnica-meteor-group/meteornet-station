@@ -7,7 +7,7 @@ import stat
 from os.path import basename, dirname, join, exists
 import logging
 
-BOOTSTRAPPER_FILENAME = 'bootstapper.py'
+BOOTSTRAPPER_FILENAME = 'bootstrapper.py'
 
 class UpdateFailed(Exception):
     pass
