@@ -14,23 +14,26 @@ class Updater:
 
     def __init__(self, project_path, main_path_inner, zip_url, preserve_files, version, version_url):
         self.project_path = project_path
+        self.project_name = path.basename(self.project_path)
+        if self.project_path[-1] == '~':
+            self.project_path_other = self.project_path[:-1]
+        else:
+            self.project_path_other = self.project_path + '~'
+
         self.main_path = path.join(self.project_path, main_path_inner)
+        self.main_path_other = path.join(self.project_path_other, main_path_inner)
         self.zip_url = zip_url
         self.version = version
         self.version_url = version_url
 
-        self.project_path_old = self.project_path + "~"
-        self.project_parent_path = path.dirname(self.project_path)
-        self.project_name = path.basename(self.project_path)
-
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        if path.exists(self.project_path_old):
+        if path.exists(self.project_path_other):
             for file in preserve_files:
-                if path.exists(path.join(self.project_path_old, file)):
-                    shutil.copyfile(path.join(self.project_path_old, file), path.join(self.project_path, file))
+                if path.exists(path.join(self.project_path_other, file)):
+                    shutil.copyfile(path.join(self.project_path_other, file), path.join(self.project_path, file))
 
-            shutil.rmtree(self.project_path_old)
+            shutil.rmtree(self.project_path_other)
             self.logger.info("Switched to new version. Update successful.")
 
     def update_required(self):
@@ -61,20 +64,18 @@ class Updater:
             with open(zip_filename, 'wb') as zip:
                 zip.write(response.content)
 
-            os.rename(self.project_path, self.project_path_old)
-
             self.logger.debug("Unzipping update.")
             zip = zipfile.ZipFile(zip_filename, 'r')
             extracted = zip.namelist()[0]
-            zip.extractall(self.project_parent_path)
+            zip.extractall(self.project_path)
             zip.close()
             os.remove(zip_filename)
-            os.rename(path.join(self.project_parent_path, extracted), path.join(self.project_parent_path, self.project_name))
+            os.rename(path.join(self.project_path, extracted), self.project_path_other)
 
-            os.chmod(self.main_path, os.stat(self.main_path).st_mode | stat.S_IEXEC)
+            os.chmod(self.main_path_other, os.stat(self.main_path_other).st_mode | stat.S_IEXEC)
 
             self.logger.info("Update downloaded, switching to new version...")
-            os.execlp(self.main_path, self.main_path)
+            os.execlp(self.main_path_other, self.main_path_other)
         except requests.exceptions.ConnectionError:
             warning = "Could not connect to the update server."
             self.logger.warning(warning)
