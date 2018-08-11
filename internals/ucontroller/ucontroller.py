@@ -70,6 +70,24 @@ class UController:
 
         return humidity, temperature
 
+    def check_power_supply(self):
+        if self.emulate:
+            output = "Command sent.\n1"
+        else:
+            output = self._process_output(self.ucontroller.send_cmd(5))
+
+        on = False
+        output = output.split('\n')
+        if len(output) > 1:
+            on = int(output[1]) > 0
+
+        if on:
+            self.logger.info("Power supply on.")
+        else:
+            self.logger.info("Power supply off.")
+
+        return on
+
     def camera_switch(self, turn_on):
         if turn_on:
             if not self.emulate:
