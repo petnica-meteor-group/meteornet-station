@@ -47,6 +47,13 @@ const char* send_cmd(int cmd) {
         } else {
             sprintf(result + strlen(COMMAND_SENT_MSG), "\n%f %f", hum, temp);
         }
+    } else if (cmd == POWER_SUPPLY_CHECK) {
+        uint32_t on;
+        if (serial_receive(&on) != 0) {
+            return ERROR_RECEIVE_MSG;
+        } else {
+            sprintf(result + strlen(COMMAND_SENT_MSG), "\n%d", on);
+        }
     }
 
     return result;

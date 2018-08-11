@@ -16,9 +16,8 @@ except ImportError:
 
 from .info_uploader.info_uploader import InfoUploader
 from .station_config.station_config import StationConfig
-from .ucontroller.ucontroller import UController
-from .updater.updater import Updater
-from .updater.updater import UpdateFailed
+from .ucontroller.ucontroller import UController, UControllerError
+from .updater.updater import Updater, UpdateFailed
 from .utils import get_info, is_night, sleep, get_trace, register
 from . import constants
 
