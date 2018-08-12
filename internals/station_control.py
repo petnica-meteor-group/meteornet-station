@@ -22,16 +22,16 @@ from .utils import get_info, is_night, sleep, get_trace, register
 from . import constants
 
 def do_work(info_uploader, station_config, ucontroller, camera_on, errors_and_timestamps):
-    for error, timestamp in errors_and_timestamps:
-        info_uploader.queue_error(error, timestamp)
-    info_uploader.queue_info(get_info(station_config, ucontroller), int(time.time()))
-
     if is_night() and not camera_on:
         ucontroller.camera_switch(True)
         camera_on = True
     elif not is_night() and camera_on:
         ucontroller.camera_switch(False)
         camera_on = False
+
+    for error, timestamp in errors_and_timestamps:
+        info_uploader.queue_error(error, timestamp)
+    info_uploader.queue_info(get_info(station_config, ucontroller), int(time.time()))
 
     return camera_on
 

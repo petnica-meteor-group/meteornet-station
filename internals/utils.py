@@ -58,7 +58,10 @@ def get_info(station_config, ucontroller):
     except ValueError:
         pass
 
-    ucontroller.check_power_supply()
+    if (ucontroller.check_power_supply()):
+        station_info['power_supply'] = 'on'
+    else:
+        station_info['power_supply'] = 'off'
 
     host_name = station_config.get('host', 'name')
     host_phone = station_config.get('host', 'phone')

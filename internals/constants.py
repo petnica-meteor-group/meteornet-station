@@ -2,7 +2,7 @@ from os.path import dirname
 from .info_uploader import info_uploader
 import platform
 
-DEBUG = False
+DEBUG = True
 EMULATE_MICROCONTROLLER = DEBUG
 
 # In minutes
