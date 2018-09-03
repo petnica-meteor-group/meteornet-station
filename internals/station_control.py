@@ -79,7 +79,7 @@ def run():
                                         if updater.update_required():
                                             needs_update = True
                             except UControllerError as e:
-                                logger.error("UController threw an error: " + e)
+                                logger.error("UController threw an error: " + str(e))
                                 info_uploader.queue_error(e, int(time.time()))
                                 logger.info("Will try to reinitialize UController later.")
                                 sleep()
