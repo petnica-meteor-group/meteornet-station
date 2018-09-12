@@ -56,14 +56,15 @@ class JsonUploader:
                                 worker_db_connection.cursor().execute('UPDATE queue SET processed = 1 WHERE id = ?', (status[0],))
                                 worker_db_connection.commit()
                                 current_status = status
-                                requests.post(self.target_url, data=json.loads(status[1]), verify=False).raise_for_status()
+                                requests.post(self.target_url, data={ 'status' : status[1] }, verify=False).raise_for_status()
                             worker_db_connection.cursor().execute('DELETE FROM queue WHERE id = ?', (status[0],))
                             worker_db_connection.commit()
                         if not first: self.logger.info("Status successfully sent.")
                     self.do_not_disturb = False
                     self.work_condition.wait()
                 except requests.exceptions.ConnectionError:
-                    self.logger.warning("Could not connect to server. Retrying in {} minutes.".format(str(self.retry_delay // 60)))
+                    self.logger.warning("Could not connect to server. Retrying in {} minutes.".format(
+                        str(self.retry_delay // 60)))
                     worker_db_connection.cursor().execute('UPDATE queue SET processed = 0 WHERE id = ?', (current_status[0],))
                     worker_db_connection.commit()
                     self.do_not_disturb = True

@@ -1,4 +1,3 @@
-from shutil import disk_usage
 import traceback
 import time
 import random
@@ -7,7 +6,8 @@ import requests
 import json
 import math
 import pprint
-from os.path import realpath
+from shutil import disk_usage
+from os.path import realpath, exists, join, dirname
 from . import constants
 
 def sleep():
@@ -36,12 +36,7 @@ def station_get_status(network_id, station_info, ucontrollers):
     station_status['timestamp'] = int(time.time())
 
     for key in station_info.get('station'):
-        value = station_info.get('station', key)
-        try:
-            value = float(value)
-        except ValueError:
-            pass
-        station_status[key] = value
+        station_status[key] = station_info.get('station', key)
 
     components = []
 
@@ -50,8 +45,8 @@ def station_get_status(network_id, station_info, ucontrollers):
 
     measurements = {}
     total_bytes, used_bytes, free_bytes = disk_usage(realpath('/'))
-    measurements['Disk used'] = str(used_bytes / (1024 ** 3))
-    measurements['Disk cap'] = str(total_bytes / (1024 ** 3))
+    measurements['Disk used'] = str(used_bytes / (1024 ** 3)) + "GiB"
+    measurements['Disk cap'] = str(total_bytes / (1024 ** 3)) + "GiB"
     computer['measurements'] = measurements
 
     components.append(computer)
@@ -69,9 +64,10 @@ def station_get_status(network_id, station_info, ucontrollers):
     i = 1
     while True:
         maintainer = station_info.get('maintainer' + str(i))
-        maintainer_data = {}
         if maintainer == None:
             break
+
+        maintainer_data = {}
         for key in maintainer:
             maintainer_data[key] = maintainer[key]
         maintainers.append(maintainer_data)
@@ -83,23 +79,13 @@ def station_get_status(network_id, station_info, ucontrollers):
 
     return station_status
 
-def status_format(status):
-    data = {}
-    for key in status:
-        value = status[key]
-        if type(value) is dict or type(value) is list or type(value) is tuple:
-            data[key] = json.dumps(value)
-        else:
-            data[key] = value
-    return data
-
 def station_register(station_status):
     logger = logging.getLogger("Utils")
 
     try:
         logger.info("Registering station...")
 
-        response = requests.post(constants.URL_REGISTER, data=status_format(station_status), verify=False)
+        response = requests.post(constants.URL_REGISTER, data={ 'status' : json.dumps(station_status) }, verify=False)
         response.raise_for_status()
 
         logger.info("Station registered successfully.")
@@ -110,3 +96,19 @@ def station_register(station_status):
         logger.warning("The registration server returned an error.")
 
     return None
+
+def get_network_id():
+    path = join(dirname(__file__), constants.NETWORK_ID_FILENAME)
+    if exists(path):
+        with open(path, 'r') as network_id_file:
+            content = network_id_file.readlines()
+            if len(content) == 1:
+                content = content.split('=')
+                if len(content) == 2:
+                    return content[1]
+    return None
+
+def set_network_id(network_id):
+    path = join(dirname(__file__), constants.NETWORK_ID_FILENAME)
+    with open(path, 'w') as network_id_file:
+        network_id_file.write('network_id=' + str(network_id))

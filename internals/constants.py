@@ -17,17 +17,19 @@ else:
 PROJECT_PATH = dirname(dirname(__file__))
 MAIN_FILENAME = 'start.py'
 
-VERSION = '1.0.1.0'
+VERSION = '1.0.1.1'
 
 STATION_INFO_FILENAME = 'station_info.cfg'
 STATION_INFO_FILEPATH = join(PROJECT_PATH, STATION_INFO_FILENAME)
 
 # hh:mm format
-NIGHT_START = '19:00'
+NIGHT_START = '18:30'
 NIGHT_END = '06:30'
 
 # Preserve the following station specific files after update
 PRESERVE_FILES = [ STATION_INFO_FILENAME, 'json_uploader/' + json_uploader.JsonUploader.DB_FILENAME ]
+
+NETWORK_ID_FILENAME = "network_id.cfg"
 
 if DEBUG:
     SERVER_URL = 'http://0.0.0.0:8000'

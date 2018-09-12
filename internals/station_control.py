@@ -12,7 +12,7 @@ from .json_uploader.json_uploader import JsonUploader
 from .station_info.station_info import StationInfo
 from .ucontrollers.ucontrollers import UControllers, UControllersError
 from .updater.updater import Updater, UpdateFailed
-from .utils import is_night, sleep, get_trace, station_get_status, station_register, status_format
+from .utils import is_night, sleep, get_trace, station_get_status, station_register, get_network_id, set_network_id
 from . import constants
 
 def run():
@@ -29,19 +29,17 @@ def run():
     logger = logging.getLogger("StationControl")
     logger.info("Starting control & telemetry")
 
-    network_id = None
-    update_failed = False
+    network_id = get_network_id()
     cameras_on = not is_night()
     errors = []
     while True:
         try:
-            with Updater(constants.PROJECT_PATH, constants.MAIN_FILENAME, constants.URL_UPDATE,
-                        constants.PRESERVE_FILES, constants.VERSION, constants.URL_VERSION) as updater:
-                if not update_failed and updater.update_required():
+            with Updater(constants.PROJECT_PATH, constants.MAIN_FILENAME, constants.VERSION,
+                         constants.URL_VERSION, constants.URL_UPDATE, constants.PRESERVE_FILES) as updater:
+                if updater.update_required():
                     updater.update()
                 else:
                     needs_update = False
-                    update_failed = False
                     with StationInfo(constants.STATION_INFO_FILEPATH) as station_info, \
                          JsonUploader(constants.URL_STATUS) as json_uploader:
                         for error in errors: json_uploader.queue(error)
@@ -54,29 +52,31 @@ def run():
                                             network_id = station_register(station_get_status(network_id, station_info, ucontrollers))
                                             if network_id == None:
                                                 logger.warning("Failed to register. Will retry later.")
-                                        if is_night() and not cameras_on:
-                                            ucontrollers.daynight_inform(True)
-                                            cameras_on = True
-                                        elif not is_night() and cameras_on:
-                                            ucontrollers.daynight_inform(False)
-                                            cameras_on = False
-                                        json_uploader.queue(status_format(station_get_status(network_id, station_info, ucontrollers)))
-                                        sleep()
+                                            else:
+                                                set_network_id(network_id)
 
+                                        if network_id != None:
+                                            if is_night() and not cameras_on:
+                                                ucontrollers.daynight_inform(True)
+                                                cameras_on = True
+                                            elif not is_night() and cameras_on:
+                                                ucontrollers.daynight_inform(False)
+                                                cameras_on = False
+                                            json_uploader.queue(station_get_status(network_id, station_info, ucontrollers))
+
+                                        sleep()
                                         if updater.update_required():
                                             needs_update = True
                             except UControllersError as e:
-                                message = str(e)
                                 trace = get_trace(e)
-                                if e.ucontroller_name != "":
-                                    message = e.ucontroller_name + ":\n" + message
-                                    trace = e.ucontroller_name + ":\n" + trace
-                                logger.error("Microcontrollers threw an error: " + message)
+                                if e.ucontroller_name != "": trace = e.ucontroller_name + ":\n" + trace
+                                logger.error("Microcontrollers threw an error:\n" + trace)
                                 error = { "error" : trace, "component" : "Computer", "timestamp" : int(time.time()) }
                                 if network_id != None: error['network_id'] = network_id
                                 json_uploader.queue(error)
                                 logger.info("Will try to reinitialize microcontrollers later.")
                                 sleep()
+                                logger.info("Reinitializing...")
 
                     updater.update()
         except KeyboardInterrupt:
@@ -84,11 +84,17 @@ def run():
             break
         except UpdateFailed:
             update_failed = True
-            logger.warning("Update failed. Continuing with old version.")
+            logger.warning("Update failed. Waiting before retrying...")
+            try:
+                sleep()
+            except KeyboardInterrupt:
+                logger.info("Ending control & telemetry.")
+                break
+            logger.info("Retrying...")
         except Exception as e:
-            logger.error("Unhandled exception occured:")
-            print(get_trace(e))
-            error = { "error" : get_trace(e), "component" : "Computer", "timestamp" : int(time.time()) }
+            trace = get_trace(e)
+            logger.error("Unhandled exception occured:\n" + trace)
+            error = { "error" : trace, "component" : "Computer", "timestamp" : int(time.time()) }
             if network_id != None: error['network_id'] = network_id
             errors.append(error)
             logger.info("Waiting before restart...")

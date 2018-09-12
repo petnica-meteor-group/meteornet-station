@@ -5,6 +5,7 @@ import os
 import math
 import logging
 import pprint
+import random
 
 class UControllersError(Exception):
 
@@ -75,10 +76,15 @@ class UControllers:
         measurements_list = []
 
         if self.emulate:
-            measurements = { 'name' : 'Emulated 1', 'data' : { 'temp' : 32, 'hum' : 50, 'voltage' : 5, 'psu' : 1 } }
-            measurements_list.append(measurements)
-            measurements = { 'name' : 'Emulated 2', 'data' : { 'temp' : 24, 'hum' : 70, 'voltage' : 12, 'psu' : 0 } }
-            measurements_list.append(measurements)
+            for i in range(1, 3):
+                measurements = { 'name' : 'Emulated ' + str(i), 'data' : {
+                        'Temperature' : str(random.uniform(20, 40)) + 'C',
+                        'Humidity' : str(random.uniform(30, 90)) + '%',
+                        'Camera voltage' : str(random.uniform(11, 13)) + 'V',
+                        'PSU' : 'on' if random.random() < 0.5 else 'off'
+                    }
+                }
+                measurements_list.append(measurements)
         else:
             for i in range(self.ucontrollers_lib.get_ucontroller_count()):
                 measurements = {}
@@ -91,10 +97,6 @@ class UControllers:
                 for line in output.split('\n')[1:]:
                     if line.strip() == "": continue
                     key, value = line.split(':')
-                    try:
-                        value = float(value)
-                    except ValueError:
-                        pass
                     measurements['data'][key] = value
 
                 measurements_list.append(measurements)
