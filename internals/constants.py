@@ -26,10 +26,14 @@ STATION_INFO_FILEPATH = join(PROJECT_PATH, STATION_INFO_FILENAME)
 NIGHT_START = '18:30'
 NIGHT_END = '06:30'
 
-# Preserve the following station specific files after update
-PRESERVE_FILES = [ STATION_INFO_FILENAME, 'json_uploader/' + json_uploader.JsonUploader.DB_FILENAME ]
+NETWORK_ID_FILENAME = 'network_id.cfg'
 
-NETWORK_ID_FILENAME = "network_id.cfg"
+# Preserve the following station specific files after update
+PRESERVE_FILES = [
+    STATION_INFO_FILENAME,
+    join(dirname(__file__), 'json_uploader/', json_uploader.JsonUploader.DB_FILENAME),
+    join(dirname(__file__), NETWORK_ID_FILENAME)
+]
 
 if DEBUG:
     SERVER_URL = 'http://0.0.0.0:8000'

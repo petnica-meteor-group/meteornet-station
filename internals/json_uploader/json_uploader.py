@@ -48,6 +48,7 @@ class JsonUploader:
                         break
                     else:
                         first = True
+                        fail = False
                         for status in worker_db_connection.cursor().execute('SELECT * FROM queue'):
                             if first:
                                 self.logger.info("Sending status to the server...")
@@ -56,10 +57,19 @@ class JsonUploader:
                                 worker_db_connection.cursor().execute('UPDATE queue SET processed = 1 WHERE id = ?', (status[0],))
                                 worker_db_connection.commit()
                                 current_status = status
-                                requests.post(self.target_url, data={ 'status' : status[1] }, verify=False).raise_for_status()
+                                response = requests.post(self.target_url, data={ 'status' : status[1] }, verify=False)
+                                response.raise_for_status()
+                                if response.text != 'success':
+                                    worker_db_connection.cursor().execute('UPDATE queue SET processed = 0 WHERE id = ?', (status[0],))
+                                    worker_db_connection.commit()
+                                    fail = True
                             worker_db_connection.cursor().execute('DELETE FROM queue WHERE id = ?', (status[0],))
                             worker_db_connection.commit()
-                        if not first: self.logger.info("Status successfully sent.")
+                        if not first:
+                            if fail:
+                                self.logger.warning("Server refused status.")
+                            else:
+                                self.logger.info("Status successfully sent.")
                     self.do_not_disturb = False
                     self.work_condition.wait()
                 except requests.exceptions.ConnectionError:

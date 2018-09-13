@@ -88,8 +88,14 @@ def station_register(station_status):
         response = requests.post(constants.URL_REGISTER, data={ 'status' : json.dumps(station_status) }, verify=False)
         response.raise_for_status()
 
-        logger.info("Station registered successfully.")
-        return response.text
+        network_id = response.text
+        if response.text == '':
+            network_id = None
+            logger.warning("Server refused registration.")
+        else:
+            logger.info("Station registered successfully.")
+
+        return network_id
     except requests.exceptions.ConnectionError:
         logger.warning("Could not connect to the registration server.")
     except requests.exceptions.RequestException:
@@ -103,7 +109,7 @@ def get_network_id():
         with open(path, 'r') as network_id_file:
             content = network_id_file.readlines()
             if len(content) == 1:
-                content = content.split('=')
+                content = content[0].split('=')
                 if len(content) == 2:
                     return content[1]
     return None
