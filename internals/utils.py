@@ -89,7 +89,7 @@ def station_register(station_status):
         response.raise_for_status()
 
         network_id = response.text
-        if response.text == '':
+        if response.text == '' or response.text == 'failure':
             network_id = None
             logger.warning("Server refused registration.")
         else:
