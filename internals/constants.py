@@ -3,7 +3,7 @@ import platform
 
 from .json_uploader import json_uploader
 
-DEBUG = True
+DEBUG = False
 EMULATE_MICROCONTROLLERS = DEBUG
 
 # In minutes
