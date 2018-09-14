@@ -1,9 +1,10 @@
-from os.path import dirname
-from .info_uploader import info_uploader
+from os.path import dirname, join
 import platform
 
+from .json_uploader import json_uploader
+
 DEBUG = False
-EMULATE_MICROCONTROLLER = DEBUG
+EMULATE_MICROCONTROLLERS = DEBUG
 
 # In minutes
 if DEBUG:
@@ -16,17 +17,23 @@ else:
 PROJECT_PATH = dirname(dirname(__file__))
 MAIN_FILENAME = 'start.py'
 
-VERSION = '1.0.0.8'
+VERSION = '1.0.1.1'
 
 STATION_INFO_FILENAME = 'station_info.cfg'
-STATION_INFO_FILEPATH = PROJECT_PATH + '/' + STATION_INFO_FILENAME
+STATION_INFO_FILEPATH = join(PROJECT_PATH, STATION_INFO_FILENAME)
 
 # hh:mm format
-NIGHT_START = '19:00'
+NIGHT_START = '18:30'
 NIGHT_END = '06:30'
 
+NETWORK_ID_FILENAME = 'network_id.cfg'
+
 # Preserve the following station specific files after update
-PRESERVE_FILES = [ STATION_INFO_FILENAME, 'info_uploader/' + info_uploader.QUEUE_FILENAME ]
+PRESERVE_FILES = [
+    STATION_INFO_FILENAME,
+    join(dirname(__file__), 'json_uploader/', json_uploader.JsonUploader.DB_FILENAME),
+    join(dirname(__file__), NETWORK_ID_FILENAME)
+]
 
 if DEBUG:
     SERVER_URL = 'http://0.0.0.0:8000'
@@ -36,7 +43,21 @@ else:
     else:
         SERVER_URL = 'https://meteori.petnica.rs:1143'
 URL_REGISTER = SERVER_URL + '/station_register'
-URL_INFO     = SERVER_URL + '/station_info'
-URL_ERROR    = SERVER_URL + '/station_error'
+URL_STATUS   = SERVER_URL + '/station_status'
 URL_VERSION  = SERVER_URL + '/station_version'
 URL_UPDATE   = SERVER_URL + '/station_update'
+
+WELCOME_MESSAGE = """
+            * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+            *                  ______ ___  ___ _____                  *
+            *                  | ___ \|  \/  ||  __ \                 *
+            *                  | |_/ /| .  . || |  \/                 *
+            *                  |  __/ | |\/| || | __                  *
+            *                  | |    | |  | || |_\ \                 *
+            *                  \_|    \_|  |_/ \____/                 *
+            *                  Meteor network station                 *
+            *                                                         *
+            *                        v{}                         *
+            *                                                         *
+            * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+""".format(VERSION)

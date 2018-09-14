@@ -37,7 +37,7 @@ STANDARD_OPTIONS="-shared -fPIC"
 CC=gcc
 CXX=g++
 OPTIONS="$STANDARD_OPTIONS -m32"
-OUTPUT=ucontroller32.so
+OUTPUT=ucontrollers32.so
 
 compile
 
@@ -45,7 +45,7 @@ compile
 CC=gcc
 CXX=g++
 OPTIONS="$STANDARD_OPTIONS"
-OUTPUT=ucontroller64.so
+OUTPUT=ucontrollers64.so
 
 compile
 
@@ -53,7 +53,7 @@ compile
 CC=i686-w64-mingw32-gcc
 CXX=i686-w64-mingw32-g++
 OPTIONS="$STANDARD_OPTIONS"
-OUTPUT=ucontroller32.dll
+OUTPUT=ucontrollers32.dll
 
 compile
 
@@ -61,7 +61,7 @@ compile
 CC=x86_64-w64-mingw32-gcc
 CXX=x86_64-w64-mingw32-g++
 OPTIONS="$STANDARD_OPTIONS"
-OUTPUT=ucontroller64.dll
+OUTPUT=ucontrollers64.dll
 
 compile
 

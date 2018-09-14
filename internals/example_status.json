@@ -1,0 +1,34 @@
+{
+    "network_id" : "abcd1234",
+    "timestamp" : "123456789",
+    "name" : "Test Station",
+    "latitude" : "30",
+    "longitude" : "60",
+    "height" : "90",
+    "comment" : "Look above!",
+    "components" : [
+        {
+            "name" : "Computer",
+            "measurements" : {
+                "Temperature" : "24",
+                "Disk usage" : "50",
+                "Disk capacity" : "100"
+            }
+        },
+        {
+            "name" : "Camera controller & PSU",
+            "measurements" : {
+                "Temperature" : "32",
+                "Humidity" : "60",
+                "PSU voltage" : "12"
+            }
+        }
+    ],
+    "maintainers" : [
+        {
+            "name" : "Cat McPaws",
+            "phone" : "123456789",
+            "email" : "cats@dogs.com"
+        }
+    ]
+}

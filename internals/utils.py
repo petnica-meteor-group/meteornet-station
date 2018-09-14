@@ -1,4 +1,3 @@
-from shutil import disk_usage
 import traceback
 import time
 import random
@@ -6,7 +5,9 @@ import logging
 import requests
 import json
 import math
-from os.path import realpath
+import pprint
+from shutil import disk_usage
+from os.path import realpath, exists, join, dirname
 from . import constants
 
 def sleep():
@@ -25,70 +26,95 @@ def is_night():
 def get_trace(exception):
     return str(''.join(traceback.format_tb(exception.__traceback__))) + str(exception)
 
-def get_info(station_config, ucontroller):
-    name = station_config.get('station', 'name')
-    latitude = station_config.get('station', 'latitude')
-    longitude = station_config.get('station', 'longitude')
-    height = station_config.get('station', 'height')
+def station_get_status(network_id, station_info, ucontrollers):
+    logger = logging.getLogger("Utils")
+    logger.debug("Gathering status data...")
 
+    station_status = {}
+
+    if network_id != None: station_status['network_id'] = network_id
+    station_status['timestamp'] = int(time.time())
+
+    for key in station_info.get('station'):
+        station_status[key] = station_info.get('station', key)
+
+    components = []
+
+    computer = {}
+    computer['name'] = 'Computer'
+
+    measurements = {}
     total_bytes, used_bytes, free_bytes = disk_usage(realpath('/'))
+    measurements['Disk used'] = str(used_bytes / (1024 ** 3)) + "GiB"
+    measurements['Disk cap'] = str(total_bytes / (1024 ** 3)) + "GiB"
+    computer['measurements'] = measurements
 
-    disk_used = str(used_bytes / (1024 ** 3))
-    disk_cap = str(total_bytes / (1024 ** 3))
+    components.append(computer)
 
-    station_info = { 'name' : name, 'disk_used' : disk_used, 'disk_cap' : disk_cap }
+    measurements_list = ucontrollers.get_measurements_list()
+    for measurement in measurements_list:
+        component = {}
+        component['name'] = measurement['name']
+        component['measurements'] = measurement['data']
+        components.append(component)
 
-    if len(latitude) > 0: station_info['latitude'] = latitude
-    if len(longitude) > 0: station_info['longitude'] = longitude
-    if len(height) > 0: station_info['height'] = height
+    station_status['components'] = components
 
-    humidity, temperature = ucontroller.get_dht_info()
-    humidity = str(humidity)
-    temperature = str(temperature)
+    maintainers = []
+    i = 1
+    while True:
+        maintainer = station_info.get('maintainer' + str(i))
+        if maintainer == None:
+            break
 
-    try:
-        if not math.isnan(float(humidity)):
-            station_info['humidity'] = humidity
-    except ValueError:
-        pass
+        maintainer_data = {}
+        for key in maintainer:
+            maintainer_data[key] = maintainer[key]
+        maintainers.append(maintainer_data)
+        i += 1
+    station_status['maintainers'] = maintainers
 
-    try:
-        if not math.isnan(float(temperature)):
-            station_info['temperature'] = temperature
-    except ValueError:
-        pass
+    logger.debug("Status data gathered.")
+    logger.debug("Status:\n" + pprint.pformat(station_status))
 
-    ucontroller.check_power_supply()
+    return station_status
 
-    host_name = station_config.get('host', 'name')
-    host_phone = station_config.get('host', 'phone')
-    host_email = station_config.get('host', 'email')
-    host_comment = station_config.get('host', 'comment')
-
-    host_info = { 'name' : host_name }
-    if len(host_phone) > 0: host_info['phone'] = host_phone
-    if len(host_email) > 0: host_info['email'] = host_email
-    if len(host_comment) > 0: host_info['comment'] = host_comment
-
-    station_info['host'] = host_info
-
-    return station_info
-
-def register(data):
+def station_register(station_status):
     logger = logging.getLogger("Utils")
 
     try:
         logger.info("Registering station...")
 
-        data = { 'data' : json.dumps(data) }
-        response = requests.post(constants.URL_REGISTER, data=data, verify=False)
+        response = requests.post(constants.URL_REGISTER, data={ 'status' : json.dumps(station_status) }, verify=False)
         response.raise_for_status()
 
-        logger.info("Station registered successfully.")
-        return response.text
+        network_id = response.text
+        if response.text == '':
+            network_id = None
+            logger.warning("Server refused registration.")
+        else:
+            logger.info("Station registered successfully.")
+
+        return network_id
     except requests.exceptions.ConnectionError:
         logger.warning("Could not connect to the registration server.")
     except requests.exceptions.RequestException:
         logger.warning("The registration server returned an error.")
 
     return None
+
+def get_network_id():
+    path = join(dirname(__file__), constants.NETWORK_ID_FILENAME)
+    if exists(path):
+        with open(path, 'r') as network_id_file:
+            content = network_id_file.readlines()
+            if len(content) == 1:
+                content = content[0].split('=')
+                if len(content) == 2:
+                    return content[1]
+    return None
+
+def set_network_id(network_id):
+    path = join(dirname(__file__), constants.NETWORK_ID_FILENAME)
+    with open(path, 'w') as network_id_file:
+        network_id_file.write('network_id=' + str(network_id))

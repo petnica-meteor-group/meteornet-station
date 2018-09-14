@@ -14,7 +14,7 @@ class UpdateFailed(Exception):
 
 class Updater:
 
-    def __init__(self, project_path, main_path_inner, zip_url, preserve_files, version, version_url):
+    def __init__(self, project_path, main_path_inner, version, version_url, zip_url, preserve_files):
         self.project_path = project_path
         self.project_name = basename(self.project_path)
         self.project_path_temp = self.project_path + '~'
