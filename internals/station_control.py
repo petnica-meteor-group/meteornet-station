@@ -2,6 +2,7 @@ import logging
 import time
 import random
 import time
+import json
 
 from . import dependencies
 import urllib3
@@ -12,7 +13,7 @@ from .json_uploader.json_uploader import JsonUploader
 from .station_info.station_info import StationInfo
 from .ucontrollers.ucontrollers import UControllers, UControllersError
 from .updater.updater import Updater, UpdateFailed
-from .utils import is_night, sleep, get_trace, station_get_status, station_register, get_network_id, set_network_id
+from .utils import is_night, sleep, get_trace, station_get_json, station_register, get_network_id, set_network_id
 from . import constants
 
 def run():
@@ -49,7 +50,7 @@ def run():
                                 with UControllers(constants.EMULATE_MICROCONTROLLERS) as ucontrollers:
                                     while not needs_update:
                                         if network_id == None:
-                                            network_id = station_register(station_get_status(network_id, station_info, ucontrollers))
+                                            network_id = station_register(station_get_json(network_id, station_info, ucontrollers))
                                             if network_id == None:
                                                 logger.warning("Failed to register. Will retry later.")
                                             else:
@@ -62,7 +63,7 @@ def run():
                                             elif not is_night() and cameras_on:
                                                 ucontrollers.daynight_inform(False)
                                                 cameras_on = False
-                                            json_uploader.queue(station_get_status(network_id, station_info, ucontrollers))
+                                            json_uploader.queue(station_get_json(network_id, station_info, ucontrollers))
 
                                         sleep()
                                         if updater.update_required():

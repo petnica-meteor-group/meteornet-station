@@ -26,17 +26,17 @@ def is_night():
 def get_trace(exception):
     return str(''.join(traceback.format_tb(exception.__traceback__))) + str(exception)
 
-def station_get_status(network_id, station_info, ucontrollers):
+def station_get_json(network_id, station_info, ucontrollers):
     logger = logging.getLogger("Utils")
-    logger.debug("Gathering status data...")
+    logger.debug("Gathering station data...")
 
-    station_status = {}
+    station_json = {}
 
-    if network_id != None: station_status['network_id'] = network_id
-    station_status['timestamp'] = int(time.time())
+    if network_id != None: station_json['network_id'] = network_id
+    station_json['timestamp'] = int(time.time())
 
     for key in station_info.get('station'):
-        station_status[key] = station_info.get('station', key)
+        station_json[key] = station_info.get('station', key)
 
     components = []
 
@@ -58,7 +58,7 @@ def station_get_status(network_id, station_info, ucontrollers):
         component['measurements'] = measurement['data']
         components.append(component)
 
-    station_status['components'] = components
+    station_json['components'] = components
 
     maintainers = []
     i = 1
@@ -72,20 +72,20 @@ def station_get_status(network_id, station_info, ucontrollers):
             maintainer_data[key] = maintainer[key]
         maintainers.append(maintainer_data)
         i += 1
-    station_status['maintainers'] = maintainers
+    station_json['maintainers'] = maintainers
 
     logger.debug("Status data gathered.")
-    logger.debug("Status:\n" + pprint.pformat(station_status))
+    logger.debug("Status:\n" + pprint.pformat(station_json))
 
-    return station_status
+    return json.dumps(station_json)
 
-def station_register(station_status):
+def station_register(station_json):
     logger = logging.getLogger("Utils")
 
     try:
         logger.info("Registering station...")
 
-        response = requests.post(constants.URL_REGISTER, data={ 'status' : json.dumps(station_status) }, verify=False)
+        response = requests.post(constants.URL_REGISTER, data={ 'json' : station_json }, verify=False)
         response.raise_for_status()
 
         network_id = response.text

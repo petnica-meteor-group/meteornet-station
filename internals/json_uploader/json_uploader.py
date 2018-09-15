@@ -31,9 +31,9 @@ class JsonUploader:
         self.worker = threading.Thread(target=JsonUploader._loop, args=(self,))
         self.worker.start()
 
-    def queue(self, data):
+    def queue(self, json):
         with self.work_lock:
-            self.db_connection.cursor().execute('INSERT INTO queue VALUES (NULL, ?, ?)', (json.dumps(data), 0))
+            self.db_connection.cursor().execute('INSERT INTO queue VALUES (NULL, ?, ?)', (json, 0))
             self.db_connection.commit()
             if not self.do_not_disturb:
                 self.work_condition.notify()
@@ -57,7 +57,7 @@ class JsonUploader:
                                 worker_db_connection.cursor().execute('UPDATE queue SET processed = 1 WHERE id = ?', (status[0],))
                                 worker_db_connection.commit()
                                 current_status = status
-                                response = requests.post(self.target_url, data={ 'status' : status[1] }, verify=False)
+                                response = requests.post(self.target_url, data={ 'json' : status[1] }, verify=False)
                                 response.raise_for_status()
                                 if response.text != 'success':
                                     worker_db_connection.cursor().execute('UPDATE queue SET processed = 0 WHERE id = ?', (status[0],))
