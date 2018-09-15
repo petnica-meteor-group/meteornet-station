@@ -18,7 +18,7 @@ else:
 PROJECT_PATH = dirname(dirname(__file__))
 MAIN_FILENAME = 'start.py'
 
-VERSION = '1.0.1.3'
+VERSION = '1.0.1.4'
 
 STATION_INFO_FILENAME = 'station_info.cfg'
 STATION_INFO_FILEPATH = join(PROJECT_PATH, STATION_INFO_FILENAME)
@@ -35,8 +35,6 @@ PRESERVE_FILES = [
     join(basename(dirname(__file__)), 'json_uploader/', json_uploader.JsonUploader.DB_FILENAME),
     join(basename(dirname(__file__)), NETWORK_ID_FILENAME)
 ]
-
-print(PRESERVE_FILES)
 
 if DEBUG:
     SERVER_URL = 'http://0.0.0.0:8000'
