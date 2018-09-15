@@ -41,7 +41,7 @@ def run():
                 else:
                     needs_update = False
                     with StationInfo(constants.STATION_INFO_FILEPATH) as station_info, \
-                         JsonUploader(constants.URL_STATUS) as json_uploader:
+                         JsonUploader(constants.URL_DATA) as json_uploader:
                         for error in errors: json_uploader.queue(error)
                         errors = []
                         while not needs_update:

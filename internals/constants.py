@@ -1,9 +1,10 @@
+import os
 from os.path import dirname, join
 import platform
 
 from .json_uploader import json_uploader
 
-DEBUG = False
+DEBUG = os.environ['DEBUG'] == 'True' if 'DEBUG' in os.environ else False
 EMULATE_MICROCONTROLLERS = DEBUG
 
 # In minutes
@@ -17,7 +18,7 @@ else:
 PROJECT_PATH = dirname(dirname(__file__))
 MAIN_FILENAME = 'start.py'
 
-VERSION = '1.0.1.1'
+VERSION = '1.0.1.2'
 
 STATION_INFO_FILENAME = 'station_info.cfg'
 STATION_INFO_FILEPATH = join(PROJECT_PATH, STATION_INFO_FILENAME)
@@ -43,7 +44,7 @@ else:
     else:
         SERVER_URL = 'https://meteori.petnica.rs:1143'
 URL_REGISTER = SERVER_URL + '/station_register'
-URL_STATUS   = SERVER_URL + '/station_status'
+URL_DATA     = SERVER_URL + '/station_data'
 URL_VERSION  = SERVER_URL + '/station_version'
 URL_UPDATE   = SERVER_URL + '/station_update'
 
