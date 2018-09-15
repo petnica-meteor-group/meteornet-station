@@ -1,5 +1,5 @@
 import os
-from os.path import dirname, join
+from os.path import dirname, basename, join
 import platform
 
 from .json_uploader import json_uploader
@@ -18,7 +18,7 @@ else:
 PROJECT_PATH = dirname(dirname(__file__))
 MAIN_FILENAME = 'start.py'
 
-VERSION = '1.0.1.2'
+VERSION = '1.0.1.3'
 
 STATION_INFO_FILENAME = 'station_info.cfg'
 STATION_INFO_FILEPATH = join(PROJECT_PATH, STATION_INFO_FILENAME)
@@ -32,9 +32,11 @@ NETWORK_ID_FILENAME = 'network_id.cfg'
 # Preserve the following station specific files after update
 PRESERVE_FILES = [
     STATION_INFO_FILENAME,
-    join(dirname(__file__), 'json_uploader/', json_uploader.JsonUploader.DB_FILENAME),
-    join(dirname(__file__), NETWORK_ID_FILENAME)
+    join(basename(dirname(__file__)), 'json_uploader/', json_uploader.JsonUploader.DB_FILENAME),
+    join(basename(dirname(__file__)), NETWORK_ID_FILENAME)
 ]
+
+print(PRESERVE_FILES)
 
 if DEBUG:
     SERVER_URL = 'http://0.0.0.0:8000'
