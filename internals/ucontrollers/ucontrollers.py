@@ -101,6 +101,17 @@ class UControllers:
 
                 measurements_list.append(measurements)
 
+        same_names = {}
+        for name_data in measurements_list:
+            name = name_data['name']
+            if name in same_names:
+                current_count = same_names[name][1]
+                if current_count == 1: same_names[name][0]['name'] += " ({})".format(current_count)
+                name_data['name'] += " ({})".format(current_count + 1)
+                same_names[name] = (name_data, current_count + 1)
+            else:
+                same_names[name] = (name_data, 1)
+
         self.logger.info("Measurements received:\n" + pprint.pformat(measurements_list))
 
         return measurements_list
