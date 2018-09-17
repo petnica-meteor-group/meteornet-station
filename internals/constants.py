@@ -18,7 +18,7 @@ else:
 PROJECT_PATH = dirname(dirname(__file__))
 MAIN_FILENAME = 'start.py'
 
-VERSION = '1.0.1.7'
+VERSION = '1.0.1.8'
 
 STATION_INFO_FILENAME = 'station_info.cfg'
 STATION_INFO_FILEPATH = join(PROJECT_PATH, STATION_INFO_FILENAME)
@@ -43,10 +43,10 @@ else:
         SERVER_URL = 'https://10.51.0.54'
     else:
         SERVER_URL = 'https://meteori.petnica.rs:1143'
-URL_REGISTER = SERVER_URL + '/station_register'
-URL_DATA     = SERVER_URL + '/station_data'
-URL_VERSION  = SERVER_URL + '/station_version'
-URL_UPDATE   = SERVER_URL + '/station_update'
+URL_REGISTER        = SERVER_URL + '/station_register'
+URL_DATA            = SERVER_URL + '/station_data'
+URL_VERSION         = SERVER_URL + '/station_version'
+URL_CODE_DOWNLOAD   = SERVER_URL + '/station_code_download'
 
 WELCOME_MESSAGE = """
             * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

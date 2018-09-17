@@ -36,7 +36,7 @@ def run():
     while True:
         try:
             with Updater(constants.PROJECT_PATH, constants.MAIN_FILENAME, constants.VERSION,
-                         constants.URL_VERSION, constants.URL_UPDATE, constants.PRESERVE_FILES) as updater:
+                         constants.URL_VERSION, constants.URL_CODE_DOWNLOAD, constants.PRESERVE_FILES) as updater:
                 if updater.update_required():
                     updater.update()
                 else:
