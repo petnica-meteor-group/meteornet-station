@@ -43,7 +43,7 @@ def run():
                     needs_update = False
                     with StationInfo(constants.STATION_INFO_FILEPATH) as station_info, \
                          JsonUploader(constants.URL_DATA) as json_uploader:
-                        for error in errors: json_uploader.queue(error)
+                        for error in errors: json_uploader.queue(json.dumps(error))
                         errors = []
                         while not needs_update:
                             try:
@@ -74,7 +74,7 @@ def run():
                                 logger.error("Microcontrollers threw an error:\n" + trace)
                                 error = { "error" : trace, "component" : "Computer", "timestamp" : int(time.time()) }
                                 if network_id != None: error['network_id'] = network_id
-                                json_uploader.queue(error)
+                                json_uploader.queue(json.dumps(error))
                                 logger.info("Will try to reinitialize microcontrollers later.")
                                 sleep()
                                 logger.info("Reinitializing...")
