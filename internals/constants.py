@@ -18,14 +18,14 @@ else:
 PROJECT_PATH = dirname(dirname(__file__))
 MAIN_FILENAME = 'start.py'
 
-VERSION = '1.0.2.0'
+VERSION = '1.0.2.1'
 
 STATION_INFO_FILENAME = 'station_info.cfg'
 STATION_INFO_FILEPATH = join(PROJECT_PATH, STATION_INFO_FILENAME)
 
 # hh:mm format
-NIGHT_START = '18:30'
-NIGHT_END = '06:30'
+NIGHT_START = '17:00'
+NIGHT_END = '08:00'
 
 NETWORK_ID_FILENAME = 'network_id.cfg'
 
