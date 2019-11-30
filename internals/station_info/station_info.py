@@ -21,7 +21,7 @@ class StationInfo:
                 station['name'] = input("Station name: ")
                 station['latitude'] = self._input_float("Station latitude (degrees, decimal): ")
                 station['longitude'] = self._input_float("Station longitude (degrees, decimal): ")
-                station['height'] = self._input_float("Station height (meters): ")
+                station['elevation'] = self._input_float("Station elevation (meters): ")
                 station['comment'] = input("A comment about station (optional): ")
                 self.config['station'] = station
                 print()
