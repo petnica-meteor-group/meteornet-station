@@ -1,6 +1,7 @@
 import os
 from os.path import dirname, basename, join
 import platform
+from datetime import date, datetime
 
 from .json_uploader import json_uploader
 
@@ -24,8 +25,18 @@ STATION_INFO_FILENAME = 'station_info.cfg'
 STATION_INFO_FILEPATH = join(PROJECT_PATH, STATION_INFO_FILENAME)
 
 # hh:mm format
-NIGHT_START = '17:00'
-NIGHT_END = '08:00'
+def GET_NIGHT_INTERVAL(when):
+    Y = 2000 # dummy leap year to allow input X-02-29 (leap day)
+    SEASONS = [('winter', (date(Y,  1,  1),  date(Y,  3, 20)), ('16:00', '08:00')),
+               ('spring', (date(Y,  3, 21),  date(Y,  6, 20)), ('18:00', '07:00')),
+               ('summer', (date(Y,  6, 21),  date(Y,  9, 22)), ('19:00', '06:00')),
+               ('autumn', (date(Y,  9, 23),  date(Y, 12, 20)), ('17:00', '07:00')),
+               ('winter', (date(Y, 12, 21),  date(Y, 12, 31)), ('16:00', '08:00'))]
+
+    if isinstance(when, datetime):
+        when = when.date()
+    when = when.replace(year=Y)
+    return next(nighttime for season, (start, end), nighttime in SEASONS if start <= when <= end)
 
 NETWORK_ID_FILENAME = 'network_id.cfg'
 

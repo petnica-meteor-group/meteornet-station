@@ -14,14 +14,14 @@ from .station_info.station_info import StationInfo
 from .ucontrollers.ucontrollers import UControllers, UControllersError
 from .updater.updater import Updater, UpdateFailed
 from .utils import is_night, sleep, get_trace, station_get_json, station_register, get_network_id, set_network_id
-from . import constants
+from . import config
 
 def run():
-    print(constants.WELCOME_MESSAGE)
+    print(config.WELCOME_MESSAGE)
 
     format = '[%(asctime)s] [%(levelname)s] %(name)s: %(message)s'
     datefmt = '%Y/%m/%d %H:%M:%S'
-    if constants.DEBUG:
+    if config.DEBUG:
         level=logging.DEBUG
     else:
         level=logging.INFO
@@ -35,19 +35,19 @@ def run():
     errors = []
     while True:
         try:
-            with Updater(constants.PROJECT_PATH, constants.MAIN_FILENAME, constants.VERSION,
-                         constants.URL_VERSION, constants.URL_CODE_DOWNLOAD, constants.PRESERVE_FILES) as updater:
+            with Updater(config.PROJECT_PATH, config.MAIN_FILENAME, config.VERSION,
+                         config.URL_VERSION, config.URL_CODE_DOWNLOAD, config.PRESERVE_FILES) as updater:
                 if updater.update_required():
                     updater.update()
                 else:
                     needs_update = False
-                    with StationInfo(constants.STATION_INFO_FILEPATH) as station_info, \
-                         JsonUploader(constants.URL_DATA) as json_uploader:
+                    with StationInfo(config.STATION_INFO_FILEPATH) as station_info, \
+                         JsonUploader(config.URL_DATA) as json_uploader:
                         for error in errors: json_uploader.queue(json.dumps(error))
                         errors = []
                         while not needs_update:
                             try:
-                                with UControllers(constants.EMULATE_MICROCONTROLLERS) as ucontrollers:
+                                with UControllers(config.EMULATE_MICROCONTROLLERS) as ucontrollers:
                                     while not needs_update:
                                         if network_id == None:
                                             network_id = station_register(station_get_json(network_id, station_info, ucontrollers))

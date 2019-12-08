@@ -8,19 +8,20 @@ import math
 import pprint
 from shutil import disk_usage
 from os.path import realpath, exists, join, dirname
-from . import constants
+from . import config
 
 def sleep():
-    delay = random.randint(int(constants.WAKEUP_PERIOD_MIN * 60), int(constants.WAKEUP_PERIOD_MAX * 60))
+    delay = random.randint(int(config.WAKEUP_PERIOD_MIN * 60), int(config.WAKEUP_PERIOD_MAX * 60))
     logging.getLogger("Utils").debug("Sleeping for {}.".format(delay))
     time.sleep(delay)
 
 def is_night():
     current_time = time.strftime('%H:%M')
-    return (constants.NIGHT_START <= current_time <= constants.NIGHT_END) or \
+    night_start, night_end = config.GET_NIGHT_INTERVAL()
+    return (night_start <= current_time <= night_end) or \
            ( \
-               ((constants.NIGHT_START <= current_time) or (current_time <= constants.NIGHT_END)) and \
-                 constants.NIGHT_END < constants.NIGHT_START \
+               ((night_start <= current_time) or (current_time <= night_end)) and \
+                 night_end < night_start \
             )
 
 def get_trace(exception):
@@ -85,7 +86,7 @@ def station_register(station_json):
     try:
         logger.info("Registering station...")
 
-        response = requests.post(constants.URL_REGISTER, data={ 'json' : station_json }, verify=False)
+        response = requests.post(config.URL_REGISTER, data={ 'json' : station_json }, verify=False)
         response.raise_for_status()
 
         network_id = response.text
@@ -104,7 +105,7 @@ def station_register(station_json):
     return None
 
 def get_network_id():
-    path = join(dirname(__file__), constants.NETWORK_ID_FILENAME)
+    path = join(dirname(__file__), config.NETWORK_ID_FILENAME)
     if exists(path):
         with open(path, 'r') as network_id_file:
             content = network_id_file.readlines()
@@ -115,6 +116,6 @@ def get_network_id():
     return None
 
 def set_network_id(network_id):
-    path = join(dirname(__file__), constants.NETWORK_ID_FILENAME)
+    path = join(dirname(__file__), config.NETWORK_ID_FILENAME)
     with open(path, 'w') as network_id_file:
         network_id_file.write('network_id=' + str(network_id))
