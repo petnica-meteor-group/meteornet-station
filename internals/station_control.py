@@ -18,6 +18,7 @@ from . import config
 
 def run():
     print(config.WELCOME_MESSAGE)
+    errors = []
 
     format = '[%(asctime)s] [%(levelname)s] %(name)s: %(message)s'
     datefmt = '%Y/%m/%d %H:%M:%S'
@@ -30,9 +31,6 @@ def run():
     logger = logging.getLogger("StationControl")
     logger.info("Starting control & telemetry")
 
-    network_id = get_network_id()
-    cameras_on = not is_night()
-    errors = []
     while True:
         try:
             with Updater(config.PROJECT_PATH, config.MAIN_FILENAME, config.VERSION,
@@ -45,6 +43,9 @@ def run():
                          JsonUploader(config.URL_DATA) as json_uploader:
                         for error in errors: json_uploader.queue(json.dumps(error))
                         errors = []
+
+                        network_id = get_network_id()
+                        cameras_on = not is_night()
                         while not needs_update:
                             try:
                                 with UControllers(config.EMULATE_MICROCONTROLLERS) as ucontrollers:

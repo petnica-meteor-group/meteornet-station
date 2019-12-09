@@ -6,6 +6,7 @@ import requests
 import json
 import math
 import pprint
+import datetime
 from shutil import disk_usage
 from os.path import realpath, exists, join, dirname
 from . import config
@@ -17,7 +18,7 @@ def sleep():
 
 def is_night():
     current_time = time.strftime('%H:%M')
-    night_start, night_end = config.GET_NIGHT_INTERVAL()
+    night_start, night_end = config.GET_NIGHT_INTERVAL(datetime.date.today())
     return (night_start <= current_time <= night_end) or \
            ( \
                ((night_start <= current_time) or (current_time <= night_end)) and \
