@@ -22,7 +22,7 @@ class StationInfo:
                 station['latitude'] = self._input_float("Station latitude (degrees, decimal): ")
                 station['longitude'] = self._input_float("Station longitude (degrees, decimal): ")
                 station['elevation'] = self._input_float("Station elevation (meters): ")
-                station['comment'] = input("A comment about station (optional): ")
+                station['info'] = input("Extra information about the station (e.g. remote access ID; optional): ")
                 self.config['station'] = station
                 print()
                 print("Please input maintainers' information.")
@@ -36,6 +36,18 @@ class StationInfo:
                     self.config['maintainer' + str(i)] = maintainer
                     i += 1
                     if not self._input_yesno("Add more maintainers? "):
+                        break
+                print()
+                print("Please input cameras' information.")
+                print("--------------------------")
+                i = 1
+                while True:
+                    camera = {}
+                    camera['azimuth'] = input("Camera azimuth: ")
+                    camera['altitude'] = input("Camera altitude: ")
+                    self.config['camera' + str(i)] = camera
+                    i += 1
+                    if not self._input_yesno("Add more cameras? "):
                         break
                 print()
                 print("Information input done. Thank you.")

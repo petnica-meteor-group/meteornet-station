@@ -60,6 +60,23 @@ def station_get_json(network_id, station_info, ucontrollers):
         component['measurements'] = measurement['data']
         components.append(component)
 
+    i = 1
+    while True:
+        camera = station_info.get('camera' + str(i))
+        if camera == None:
+            break
+
+        camera_data = {}
+        if i == 1:
+            camera_data['name'] = 'Camera (ϕ: {}, λ: {})'.format(camera['azimuth'], camera['altitude'])
+        else:
+            camera_data['name'] = 'Camera {} (ϕ: {}, λ: {})'.format(str(i), camera['azimuth'], camera['altitude'])
+            if i == 2:
+                components[-1]['name'] = components[-1]['name'][0:7] + "1 " + components[-1]['name'][7:]
+
+        components.append(camera_data)
+        i += 1
+
     station_json['components'] = components
 
     maintainers = []

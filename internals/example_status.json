@@ -5,7 +5,7 @@
     "latitude" : "30",
     "longitude" : "60",
     "height" : "90",
-    "comment" : "Look above!",
+    "info" : "Look above!",
     "components" : [
         {
             "name" : "Computer",
@@ -29,6 +29,12 @@
             "name" : "Cat McPaws",
             "phone" : "123456789",
             "email" : "cats@dogs.com"
+        }
+    ],
+    "cameras" : [
+        {
+            "azimuth" : "10",
+            "altitude" : "20"
         }
     ]
 }
