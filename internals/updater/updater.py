@@ -69,7 +69,7 @@ class Updater:
             os.rename(join(self.project_path, extracted), self.project_path_temp)
 
             spec = importlib.util.spec_from_file_location(
-                basename(self.config_relpath)[:-3],
+                "internals.config",
                 join(self.project_path_temp, self.config_relpath)
             )
             new_config = spec.loader.exec_module(importlib.util.module_from_spec(spec))
