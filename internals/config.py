@@ -8,7 +8,7 @@ from .json_uploader import json_uploader
 DEBUG = os.environ['DEBUG'] == 'True' if 'DEBUG' in os.environ else False
 EMULATE_UCONTROLLERS = DEBUG
 
-VERSION = '1.0.3.3'
+VERSION = '1.0.3.4'
 
 PROJECT_PATH = dirname(dirname(abspath(__file__)))
 CONFIG_RELPATH = relpath(abspath(__file__), PROJECT_PATH)
@@ -42,8 +42,7 @@ def GET_NIGHT_INTERVAL(when):
 PRESERVE_FILES = [
     STATION_INFO_RELPATH,
     join(CONFIG_RELPATH, 'json_uploader', json_uploader.JsonUploader.DB_FILENAME),
-    SECURITY_TOKEN_RELPATH,
-    "internals/meow.cfg"
+    SECURITY_TOKEN_RELPATH
 ]
 
 if DEBUG:
