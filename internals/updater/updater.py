@@ -6,7 +6,7 @@ import zipfile
 import stat
 from os.path import basename, dirname, join, exists
 import logging
-import importlib
+import importlib.util
 
 BOOTSTRAPPER_FILENAME = 'bootstrapper.py'
 
@@ -68,8 +68,13 @@ class Updater:
             os.remove(zip_filename)
             os.rename(join(self.project_path, extracted), self.project_path_temp)
 
-            os.chdir(self.project_path_temp)
-            import internals.config as new_config
+            spec = importlib.util.spec_from_file_location(
+                dirname(self.config_relpath) + "." + basename(self.config_relpath)[:-3],
+                join(self.project_path_temp, self.config_relpath)
+            )
+            new_config = importlib.util.module_from_spec(spec)
+            sys.modules[spec.name] = new_config
+            spec.loader.exec_module(new_config)
 
             for i, filepath in enumerate(self.preserve_files):
                 new_filepath = new_config.PRESERVE_FILES[i]
