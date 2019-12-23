@@ -68,11 +68,15 @@ class Updater:
             os.remove(zip_filename)
             os.rename(join(self.project_path, extracted), self.project_path_temp)
 
-            spec = importlib.util.spec_from_file_location(
-                "internals.config",
-                join(self.project_path_temp, self.config_relpath)
-            )
-            new_config = spec.loader.exec_module(importlib.util.module_from_spec(spec))
+            sys.path.append(join(self.project_path_temp, dirname(self.config_relpath)))
+
+            spec = importlib.util.spec_from_file_location("config", join(self.project_path_temp, self.config_relpath))
+            module = importlib.util.module_from_spec(spec)
+            sys.modules["config"] = module
+            new_config = spec.loader.exec_module(module)
+
+            print(new_config)
+            
             for i, filepath in enumerate(self.preserve_files):
                 new_filepath = new_config.PRESERVE_FILES[i]
                 if exists(join(self.project_path, filepath)) and new_filepath:
