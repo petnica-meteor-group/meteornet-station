@@ -1,12 +1,20 @@
 import os
-from os.path import dirname, basename, join
+from os.path import dirname, basename, join, abspath, relpath
 import platform
 from datetime import date, datetime
 
 from .json_uploader import json_uploader
 
 DEBUG = os.environ['DEBUG'] == 'True' if 'DEBUG' in os.environ else False
-EMULATE_MICROCONTROLLERS = DEBUG
+EMULATE_UCONTROLLERS = DEBUG
+
+VERSION = '1.0.3.3'
+
+PROJECT_PATH = dirname(dirname(abspath(__file__)))
+CONFIG_REL_PATH = relpath(abspath(__file__), PROJECT_PATH)
+MAIN_REL_PATH = 'start.py'
+STATION_INFO_REL_PATH = 'station_info.cfg'
+SECURITY_TOKEN_REL_PATH = join(CONFIG_REL_PATH, 'security_token.cfg')
 
 # In minutes
 if DEBUG:
@@ -15,14 +23,6 @@ if DEBUG:
 else:
     WAKEUP_PERIOD_MIN = 20
     WAKEUP_PERIOD_MAX = 30
-
-PROJECT_PATH = dirname(dirname(__file__))
-MAIN_FILENAME = 'start.py'
-
-VERSION = '1.0.3.1'
-
-STATION_INFO_FILENAME = 'station_info.cfg'
-STATION_INFO_FILEPATH = join(PROJECT_PATH, STATION_INFO_FILENAME)
 
 # hh:mm format
 def GET_NIGHT_INTERVAL(when):
@@ -38,13 +38,11 @@ def GET_NIGHT_INTERVAL(when):
     when = when.replace(year=Y)
     return next(nighttime for season, (start, end), nighttime in SEASONS if start <= when <= end)
 
-SECURITY_TOKEN_FILENAME = 'security_token.cfg'
-
 # Preserve the following station specific files after update
 PRESERVE_FILES = [
-    STATION_INFO_FILENAME,
-    join(basename(dirname(__file__)), 'json_uploader/', json_uploader.JsonUploader.DB_FILENAME),
-    join(basename(dirname(__file__)), SECURITY_TOKEN_FILENAME)
+    STATION_INFO_REL_PATH,
+    join(CONFIG_REL_PATH, 'json_uploader', json_uploader.JsonUploader.DB_FILENAME),
+    SECURITY_TOKEN_REL_PATH
 ]
 
 if DEBUG:
@@ -60,16 +58,16 @@ URL_VERSION         = SERVER_URL + '/station_version'
 URL_CODE_DOWNLOAD   = SERVER_URL + '/station_code_download'
 
 WELCOME_MESSAGE = """
-            * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-            *                  ______ ___  ___ _____                  *
-            *                  | ___ \|  \/  ||  __ \                 *
-            *                  | |_/ /| .  . || |  \/                 *
-            *                  |  __/ | |\/| || | __                  *
-            *                  | |    | |  | || |_\ \                 *
-            *                  \_|    \_|  |_/ \____/                 *
-            *                  Meteor network station                 *
-            *                                                         *
-            *                        v{}                         *
-            *                                                         *
-            * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+          * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+          *                  ______ ___  ___ _____                  *
+          *                  | ___ \|  \/  ||  __ \                 *
+          *                  | |_/ /| .  . || |  \/                 *
+          *                  |  __/ | |\/| || | __                  *
+          *                  | |    | |  | || |_\ \                 *
+          *                  \_|    \_|  |_/ \____/                 *
+          *                  Meteor network station                 *
+          *                                                         *
+          *                        v{}                         *
+          *                                                         *
+          * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 """.format(VERSION)

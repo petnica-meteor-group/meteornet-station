@@ -6,6 +6,7 @@ import zipfile
 import stat
 from os.path import basename, dirname, join, exists
 import logging
+import importlib
 
 BOOTSTRAPPER_FILENAME = 'bootstrapper.py'
 
@@ -14,15 +15,16 @@ class UpdateFailed(Exception):
 
 class Updater:
 
-    def __init__(self, project_path, main_path_inner, version, version_url, zip_url, preserve_files):
-        self.project_path = project_path
+    def __init__(self, config):
+        self.project_path = config.PROJECT_PATH
         self.project_name = basename(self.project_path)
         self.project_path_temp = self.project_path + '~'
-        self.main_path = join(self.project_path, main_path_inner)
-        self.zip_url = zip_url
-        self.preserve_files = preserve_files
-        self.version = version
-        self.version_url = version_url
+        self.main_path = join(self.project_path, config.MAIN_REL_PATH)
+        self.zip_url = config.URL_CODE_DOWNLOAD
+        self.preserve_files = config.PRESERVE_FILES
+        self.config_rel_path = config.CONFIG_REL_PATH
+        self.version = config.VERSION
+        self.version_url = config.URL_VERSION
 
         self.logger = logging.getLogger(self.__class__.__name__)
 
@@ -66,9 +68,11 @@ class Updater:
             os.remove(zip_filename)
             os.rename(join(self.project_path, extracted), self.project_path_temp)
 
-            for file in self.preserve_files:
-                if exists(join(self.project_path, file)):
-                    shutil.copyfile(join(self.project_path, file), join(self.project_path_temp, file))
+            new_config = importlib.import_module(join(self.project_path_temp, self.config_rel_path))
+            for i, filepath in enumerate(self.preserve_files):
+                new_filepath = new_config.PRESERVE_FILES[i]
+                if exists(join(self.project_path, filepath)) and new_filepath:
+                    shutil.copyfile(join(self.project_path, filepath), join(self.project_path_temp, new_filepath))
 
             bootstrapper_path = join(dirname(self.project_path), BOOTSTRAPPER_FILENAME)
             shutil.copyfile(join(dirname(__file__), BOOTSTRAPPER_FILENAME), bootstrapper_path)

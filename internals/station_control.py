@@ -33,8 +33,7 @@ def run():
 
     while True:
         try:
-            with Updater(config.PROJECT_PATH, config.MAIN_FILENAME, config.VERSION,
-                         config.URL_VERSION, config.URL_CODE_DOWNLOAD, config.PRESERVE_FILES) as updater:
+            with Updater(config) as updater:
                 if updater.update_required():
                     updater.update()
                 else:
@@ -48,7 +47,7 @@ def run():
                         cameras_on = not is_night()
                         while not needs_update:
                             try:
-                                with UControllers(config.EMULATE_MICROCONTROLLERS) as ucontrollers:
+                                with UControllers(config.EMULATE_UCONTROLLERS) as ucontrollers:
                                     while not needs_update:
                                         if security_token == None:
                                             security_token = station_register(station_get_json(security_token, station_info, ucontrollers))
