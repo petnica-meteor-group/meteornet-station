@@ -13,7 +13,7 @@ from .json_uploader.json_uploader import JsonUploader
 from .station_info.station_info import StationInfo
 from .ucontrollers.ucontrollers import UControllers, UControllersError
 from .updater.updater import Updater, UpdateFailed
-from .utils import is_night, sleep, get_trace, station_get_json, station_register, get_network_id, set_network_id
+from .utils import is_night, sleep, get_trace, station_get_json, station_register, get_security_token, set_security_token
 from . import config
 
 def run():
@@ -44,27 +44,27 @@ def run():
                         for error in errors: json_uploader.queue(json.dumps(error))
                         errors = []
 
-                        network_id = get_network_id()
+                        security_token = get_security_token()
                         cameras_on = not is_night()
                         while not needs_update:
                             try:
                                 with UControllers(config.EMULATE_MICROCONTROLLERS) as ucontrollers:
                                     while not needs_update:
-                                        if network_id == None:
-                                            network_id = station_register(station_get_json(network_id, station_info, ucontrollers))
-                                            if network_id == None:
+                                        if security_token == None:
+                                            security_token = station_register(station_get_json(security_token, station_info, ucontrollers))
+                                            if security_token == None:
                                                 logger.warning("Failed to register. Will retry later.")
                                             else:
-                                                set_network_id(network_id)
+                                                set_security_token(security_token)
 
-                                        if network_id != None:
+                                        if security_token != None:
                                             if is_night() and not cameras_on:
                                                 ucontrollers.daynight_inform(True)
                                                 cameras_on = True
                                             elif not is_night() and cameras_on:
                                                 ucontrollers.daynight_inform(False)
                                                 cameras_on = False
-                                            json_uploader.queue(station_get_json(network_id, station_info, ucontrollers))
+                                            json_uploader.queue(station_get_json(security_token, station_info, ucontrollers))
 
                                         sleep()
                                         if updater.update_required():
@@ -74,7 +74,7 @@ def run():
                                 if e.ucontroller_name != "": trace = e.ucontroller_name + ":\n" + trace
                                 logger.error("Microcontrollers threw an error:\n" + trace)
                                 error = { "error" : trace, "component" : "Computer", "timestamp" : int(time.time()) }
-                                if network_id != None: error['network_id'] = network_id
+                                if security_token != None: error['security_token'] = security_token
                                 json_uploader.queue(json.dumps(error))
                                 logger.info("Will try to reinitialize microcontrollers later.")
                                 sleep()
@@ -97,7 +97,7 @@ def run():
             trace = get_trace(e)
             logger.error("Unhandled exception occured:\n" + trace)
             error = { "error" : trace, "component" : "Computer", "timestamp" : int(time.time()) }
-            if network_id != None: error['network_id'] = network_id
+            if security_token != None: error['security_token'] = security_token
             errors.append(error)
             logger.info("Waiting before restart...")
             try:

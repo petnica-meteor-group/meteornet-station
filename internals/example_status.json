@@ -1,5 +1,5 @@
 {
-    "network_id" : "abcd1234",
+    "security_token" : "abcd1234",
     "timestamp" : "123456789",
     "name" : "Test Station",
     "latitude" : "30",

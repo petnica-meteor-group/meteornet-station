@@ -28,13 +28,13 @@ def is_night():
 def get_trace(exception):
     return str(''.join(traceback.format_tb(exception.__traceback__))) + str(exception)
 
-def station_get_json(network_id, station_info, ucontrollers):
+def station_get_json(security_token, station_info, ucontrollers):
     logger = logging.getLogger("Utils")
     logger.debug("Gathering station data...")
 
     station_json = {}
 
-    if network_id != None: station_json['network_id'] = network_id
+    if security_token != None: station_json['security_token'] = security_token
     station_json['timestamp'] = int(time.time())
 
     for key in station_info.get('station'):
@@ -107,14 +107,14 @@ def station_register(station_json):
         response = requests.post(config.URL_REGISTER, data={ 'json' : station_json }, verify=False)
         response.raise_for_status()
 
-        network_id = response.text
+        security_token = response.text
         if response.text == '' or response.text == 'failure':
-            network_id = None
+            security_token = None
             logger.warning("Server refused registration.")
         else:
             logger.info("Station registered successfully.")
 
-        return network_id
+        return security_token
     except requests.exceptions.ConnectionError:
         logger.warning("Could not connect to the registration server.")
     except requests.exceptions.RequestException:
@@ -122,18 +122,18 @@ def station_register(station_json):
 
     return None
 
-def get_network_id():
-    path = join(dirname(__file__), config.NETWORK_ID_FILENAME)
+def get_security_token():
+    path = join(dirname(__file__), config.SECURITY_TOKEN_FILENAME)
     if exists(path):
-        with open(path, 'r') as network_id_file:
-            content = network_id_file.readlines()
+        with open(path, 'r') as security_token_file:
+            content = security_token_file.readlines()
             if len(content) == 1:
                 content = content[0].split('=')
                 if len(content) == 2:
                     return content[1]
     return None
 
-def set_network_id(network_id):
-    path = join(dirname(__file__), config.NETWORK_ID_FILENAME)
-    with open(path, 'w') as network_id_file:
-        network_id_file.write('network_id=' + str(network_id))
+def set_security_token(security_token):
+    path = join(dirname(__file__), config.SECURITY_TOKEN_FILENAME)
+    with open(path, 'w') as security_token_file:
+        security_token_file.write('security_token=' + str(security_token))
