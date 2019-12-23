@@ -18,7 +18,7 @@ class Updater:
     def __init__(self, config):
         self.project_path = config.PROJECT_PATH
         self.project_name = basename(self.project_path)
-        self.project_path_temp = self.project_path + '~'
+        self.project_path_temp = self.project_path + '_temp'
         self.main_path = join(self.project_path, config.MAIN_RELPATH)
         self.zip_url = config.URL_CODE_DOWNLOAD
         self.preserve_files = config.PRESERVE_FILES
@@ -68,15 +68,9 @@ class Updater:
             os.remove(zip_filename)
             os.rename(join(self.project_path, extracted), self.project_path_temp)
 
-            sys.path.append(join(self.project_path_temp, dirname(self.config_relpath)))
+            os.chdir(self.project_path_temp)
+            import internals.config as new_config
 
-            spec = importlib.util.spec_from_file_location("config", join(self.project_path_temp, self.config_relpath))
-            module = importlib.util.module_from_spec(spec)
-            sys.modules["config"] = module
-            new_config = spec.loader.exec_module(module)
-
-            print(new_config)
-            
             for i, filepath in enumerate(self.preserve_files):
                 new_filepath = new_config.PRESERVE_FILES[i]
                 if exists(join(self.project_path, filepath)) and new_filepath:
