@@ -3,7 +3,7 @@ from os.path import dirname, basename, join, abspath, relpath
 import platform
 from datetime import date, datetime
 
-from .json_uploader import json_uploader
+from internals.json_uploader import json_uploader
 
 DEBUG = os.environ['DEBUG'] == 'True' if 'DEBUG' in os.environ else False
 EMULATE_UCONTROLLERS = DEBUG

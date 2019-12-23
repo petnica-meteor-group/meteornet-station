@@ -68,7 +68,11 @@ class Updater:
             os.remove(zip_filename)
             os.rename(join(self.project_path, extracted), self.project_path_temp)
 
-            new_config = importlib.import_module(join(self.project_path_temp, self.config_relpath))
+            spec = importlib.util.spec_from_file_location(
+                basename(self.config_relpath)[:-3],
+                join(self.project_path_temp, self.config_relpath)
+            )
+            new_config = spec.loader.exec_module(importlib.util.module_from_spec(spec))
             for i, filepath in enumerate(self.preserve_files):
                 new_filepath = new_config.PRESERVE_FILES[i]
                 if exists(join(self.project_path, filepath)) and new_filepath:
@@ -87,6 +91,16 @@ class Updater:
         except requests.exceptions.RequestException:
             warning = "The update server returned an error."
             self.logger.warning(warning)
+            raise UpdateFailed(warning)
+        except Exception as e:
+            def get_trace(exception):
+                import traceback
+                return str(''.join(traceback.format_tb(exception.__traceback__))) + str(exception)
+
+            warning = "Unhandled exception during update: " + str(get_trace(e))
+            self.logger.warning(warning)
+            if exists(self.project_path_temp):
+                shutil.rmtree(self.project_path_temp)
             raise UpdateFailed(warning)
 
     def end(self):
