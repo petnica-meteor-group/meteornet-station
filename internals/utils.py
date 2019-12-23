@@ -123,7 +123,7 @@ def station_register(station_json):
     return None
 
 def get_security_token():
-    path = join(dirname(__file__), config.SECURITY_TOKEN_FILENAME)
+    path = join(config.PROJECT_PATH, config.SECURITY_TOKEN_RELPATH)
     if exists(path):
         with open(path, 'r') as security_token_file:
             content = security_token_file.readlines()
@@ -134,6 +134,6 @@ def get_security_token():
     return None
 
 def set_security_token(security_token):
-    path = join(dirname(__file__), config.SECURITY_TOKEN_FILENAME)
+    path = join(config.PROJECT_PATH, config.SECURITY_TOKEN_RELPATH)
     with open(path, 'w') as security_token_file:
         security_token_file.write('security_token=' + str(security_token))

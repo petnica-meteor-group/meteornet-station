@@ -3,6 +3,7 @@ import time
 import random
 import time
 import json
+from os.path import join
 
 from . import dependencies
 import urllib3
@@ -38,7 +39,7 @@ def run():
                     updater.update()
                 else:
                     needs_update = False
-                    with StationInfo(config.STATION_INFO_FILEPATH) as station_info, \
+                    with StationInfo(join(config.PROJECT_PATH, config.STATION_INFO_RELPATH)) as station_info, \
                          JsonUploader(config.URL_DATA) as json_uploader:
                         for error in errors: json_uploader.queue(json.dumps(error))
                         errors = []

@@ -19,10 +19,10 @@ class Updater:
         self.project_path = config.PROJECT_PATH
         self.project_name = basename(self.project_path)
         self.project_path_temp = self.project_path + '~'
-        self.main_path = join(self.project_path, config.MAIN_REL_PATH)
+        self.main_path = join(self.project_path, config.MAIN_RELPATH)
         self.zip_url = config.URL_CODE_DOWNLOAD
         self.preserve_files = config.PRESERVE_FILES
-        self.config_rel_path = config.CONFIG_REL_PATH
+        self.config_relpath = config.CONFIG_RELPATH
         self.version = config.VERSION
         self.version_url = config.URL_VERSION
 
@@ -68,7 +68,7 @@ class Updater:
             os.remove(zip_filename)
             os.rename(join(self.project_path, extracted), self.project_path_temp)
 
-            new_config = importlib.import_module(join(self.project_path_temp, self.config_rel_path))
+            new_config = importlib.import_module(join(self.project_path_temp, self.config_relpath))
             for i, filepath in enumerate(self.preserve_files):
                 new_filepath = new_config.PRESERVE_FILES[i]
                 if exists(join(self.project_path, filepath)) and new_filepath:

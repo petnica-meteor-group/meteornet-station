@@ -11,10 +11,10 @@ EMULATE_UCONTROLLERS = DEBUG
 VERSION = '1.0.3.3'
 
 PROJECT_PATH = dirname(dirname(abspath(__file__)))
-CONFIG_REL_PATH = relpath(abspath(__file__), PROJECT_PATH)
-MAIN_REL_PATH = 'start.py'
-STATION_INFO_REL_PATH = 'station_info.cfg'
-SECURITY_TOKEN_REL_PATH = join(CONFIG_REL_PATH, 'security_token.cfg')
+CONFIG_RELPATH = relpath(abspath(__file__), PROJECT_PATH)
+MAIN_RELPATH = 'start.py'
+STATION_INFO_RELPATH = 'station_info.cfg'
+SECURITY_TOKEN_RELPATH = join(dirname(CONFIG_RELPATH), 'security_token.cfg')
 
 # In minutes
 if DEBUG:
@@ -40,9 +40,9 @@ def GET_NIGHT_INTERVAL(when):
 
 # Preserve the following station specific files after update
 PRESERVE_FILES = [
-    STATION_INFO_REL_PATH,
-    join(CONFIG_REL_PATH, 'json_uploader', json_uploader.JsonUploader.DB_FILENAME),
-    SECURITY_TOKEN_REL_PATH
+    STATION_INFO_RELPATH,
+    join(CONFIG_RELPATH, 'json_uploader', json_uploader.JsonUploader.DB_FILENAME),
+    SECURITY_TOKEN_RELPATH
 ]
 
 if DEBUG:
