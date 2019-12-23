@@ -42,7 +42,8 @@ def GET_NIGHT_INTERVAL(when):
 PRESERVE_FILES = [
     STATION_INFO_RELPATH,
     join(CONFIG_RELPATH, 'json_uploader', json_uploader.JsonUploader.DB_FILENAME),
-    SECURITY_TOKEN_RELPATH
+    SECURITY_TOKEN_RELPATH,
+    "internals/meow.cfg"
 ]
 
 if DEBUG:
