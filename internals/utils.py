@@ -68,9 +68,9 @@ def station_get_json(security_token, station_info, ucontrollers):
 
         camera_data = {}
         if i == 1:
-            camera_data['name'] = 'Camera (ϕ: {}, λ: {})'.format(camera['azimuth'], camera['altitude'])
+            camera_data['name'] = 'Camera (ϕ: {}°, λ: {}°)'.format(camera['azimuth'], camera['altitude'])
         else:
-            camera_data['name'] = 'Camera {} (ϕ: {}, λ: {})'.format(str(i), camera['azimuth'], camera['altitude'])
+            camera_data['name'] = 'Camera {} (ϕ: {}°, λ: {}°)'.format(str(i), camera['azimuth'], camera['altitude'])
             if i == 2:
                 components[-1]['name'] = components[-1]['name'][0:7] + "1 " + components[-1]['name'][7:]
 
