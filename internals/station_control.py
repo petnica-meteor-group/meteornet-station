@@ -34,6 +34,11 @@ def run():
 
     while True:
         try:
+            '''
+                In general, it's better to provide values from config than the
+                config object itself to reduce coupling. However, an exception is made
+                for the Updater, as it needs to know the whole project layout.
+            '''
             with Updater(config) as updater:
                 if updater.update_required():
                     updater.update()
@@ -48,8 +53,10 @@ def run():
                         cameras_on = not is_night()
                         while not needs_update:
                             try:
+                                ucontroller_count = 0
                                 with UControllers(config.EMULATE_UCONTROLLERS) as ucontrollers:
-                                    while not needs_update:
+                                    ucontroller_count = ucontrollers.get_ucontroller_count()
+                                    while True:
                                         if security_token == None:
                                             security_token = station_register(station_get_json(security_token, station_info, ucontrollers))
                                             if security_token == None:
@@ -69,6 +76,10 @@ def run():
                                         sleep()
                                         if updater.update_required():
                                             needs_update = True
+                                            break
+                                        if ucontroller_count == 0:
+                                            logger.warning("No microcontrollers detected, retrying...")
+                                            break
                             except UControllersError as e:
                                 trace = get_trace(e)
                                 if e.ucontroller_name != "": trace = e.ucontroller_name + ":\n" + trace

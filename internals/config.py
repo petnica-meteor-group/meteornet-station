@@ -8,7 +8,7 @@ from .json_uploader import json_uploader
 DEBUG = os.environ['DEBUG'] == 'True' if 'DEBUG' in os.environ else False
 EMULATE_UCONTROLLERS = DEBUG
 
-VERSION = '1.0.3.5'
+VERSION = '1.0.3.6'
 
 PROJECT_PATH = dirname(dirname(abspath(__file__)))
 CONFIG_RELPATH = relpath(abspath(__file__), PROJECT_PATH)

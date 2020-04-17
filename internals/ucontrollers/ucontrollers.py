@@ -60,6 +60,12 @@ class UControllers:
             count = self.ucontrollers_lib.get_ucontroller_count()
             self.logger.info("Found {} microcontroller(s).".format(count))
 
+    def get_ucontroller_count(self):
+        if self.emulate:
+            return 2
+        else:
+            return self.ucontrollers_lib.get_ucontroller_count()
+
     def daynight_inform(self, is_night):
         if is_night:
             if not self.emulate:
