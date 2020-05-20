@@ -17,4 +17,4 @@ Running
 =====
 
 Code has been tested on Linux and Windows, both 32 and 64 bit.
-To run, place the project on the partition where meteor data will be stored and execute main.py with administrator privileges. (Requires Python 3.4+).
+To run, place the project on the partition where meteor data will be stored and execute start.py with administrator privileges. (Requires Python 3.4+).
